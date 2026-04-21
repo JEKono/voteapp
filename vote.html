@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プレゼン投票</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;
+  --border:rgba(255,255,255,0.08);--accent:#f0c040;--accent2:#e05a5a;
+  --text:#f0eee8;--muted:#888;
+  --c1:#7c6af7;--c2:#4fa8e0;--c3:#4ec97a;--c4:#f07060;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.page{display:none;min-height:100vh;flex-direction:column;}
+.page.active{display:flex;}
+
+/* SETUP */
+#setupPage{padding:24px;gap:14px;align-items:stretch;}
+#setupPage h1{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;color:var(--accent);text-align:center;}
+.sub{font-size:12px;color:var(--muted);text-align:center;}
+.setup-team{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;}
+.setup-num{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+.s0 .setup-num{color:var(--c1);} .s1 .setup-num{color:var(--c2);} .s2 .setup-num{color:var(--c3);} .s3 .setup-num{color:var(--c4);}
+.setup-label{font-size:11px;color:var(--muted);margin-top:4px;}
+.setup-input{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;}
+.setup-input:focus{outline:none;border-color:var(--accent);}
+.voter-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.voter-input{width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;text-align:center;}
+.voter-input:focus{outline:none;border-color:var(--accent);}
+.btn{padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;text-align:center;width:100%;}
+.btn:hover{background:rgba(255,255,255,0.08);}
+.btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;}
+.btn.primary:hover{background:#ffd060;}
+.btn.danger{border-color:rgba(224,90,90,0.4);color:var(--accent2);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ADMIN */
+#adminPage{background:var(--bg);}
+.admin-header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.admin-header h1{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--accent);}
+.badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);}
+.badge.open{color:#4ec97a;border-color:rgba(78,201,122,0.3);}
+.admin-body{padding:14px;display:flex;flex-direction:column;gap:12px;flex:1;}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:4px;}
+.team-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;margin-bottom:10px;transition:border-color .3s;}
+.team-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
+.tc0::before{background:var(--c1);} .tc1::before{background:var(--c2);} .tc2::before{background:var(--c3);} .tc3::before{background:var(--c4);}
+.team-card.leading{border-color:var(--accent);}
+.leading-badge{position:absolute;top:12px;right:12px;font-size:10px;color:var(--accent);letter-spacing:1px;font-weight:500;}
+.tc-name{font-size:14px;font-weight:500;} .tc-pres{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.score-row{display:flex;align-items:center;gap:10px;}
+.score-avg{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;min-width:56px;}
+.score-detail{flex:1;}
+.vc-count{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.bar-outer{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.bar-inner{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);width:0;}
+.tc0 .bar-inner{background:var(--c1);} .tc1 .bar-inner{background:var(--c2);} .tc2 .bar-inner{background:var(--c3);} .tc3 .bar-inner{background:var(--c4);}
+.sbs{display:flex;gap:4px;margin-top:8px;}
+.sb-col{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.sb-track{width:22px;height:36px;background:var(--surface2);border-radius:3px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;}
+.sb-fill{width:100%;background:var(--accent);opacity:.6;transition:height .6s ease;}
+.sb-label{font-size:10px;color:var(--muted);}
+.qr-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+#qrcode img,#qrcode canvas{border-radius:8px;}
+.qr-hint{font-size:11px;color:var(--muted);text-align:center;line-height:1.7;}
+.url-box{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:10px;color:var(--muted);word-break:break-all;text-align:center;width:100%;}
+
+/* VOTE */
+#votePage{background:var(--bg);}
+.vote-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;text-align:center;}
+.vote-header h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--accent);}
+.vote-header p{font-size:11px;color:var(--muted);margin-top:2px;}
+.vote-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:10px;}
+.vote-card{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden;}
+.vote-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
+.vc0::before{background:var(--c1);} .vc1::before{background:var(--c2);} .vc2::before{background:var(--c3);} .vc3::before{background:var(--c4);}
+.vc-title{font-size:14px;font-weight:500;} .vc-pres{font-size:11px;color:var(--muted);margin-bottom:8px;}
+.rating-row{display:flex;gap:5px;}
+.star-btn{flex:1;padding:9px 2px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--muted);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.star-num{font-size:15px;font-weight:500;color:var(--text);}
+.star-btn.sel,.star-btn:hover{border-color:var(--accent);background:rgba(240,192,64,0.12);color:var(--accent);}
+.star-btn.sel .star-num,.star-btn:hover .star-num{color:var(--accent);}
+.vote-footer{padding:12px 14px 32px;}
+#submitBtn{width:100%;padding:15px;border-radius:10px;border:none;background:var(--accent);color:#000;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+#submitBtn:hover{background:#ffd060;}
+#submitBtn:active{transform:scale(.98);}
+#submitBtn:disabled{background:var(--muted);cursor:not-allowed;}
+
+/* THANKS */
+#thanksPage{justify-content:center;align-items:center;background:var(--bg);}
+.thanks-wrap{text-align:center;padding:32px;}
+.thanks-icon{font-size:64px;margin-bottom:16px;}
+.thanks-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--accent);margin-bottom:8px;}
+.thanks-wrap p{color:var(--muted);font-size:13px;line-height:1.8;}
+
+/* RESULT OVERLAY */
+#resultOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+#resultOverlay.active{display:flex;}
+.drumroll-wrap{text-align:center;}
+.drumroll-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:4px;color:var(--accent);animation:pulse .3s infinite alternate;}
+@keyframes pulse{from{opacity:.7;transform:scale(.97);}to{opacity:1;transform:scale(1);}}
+.result-wrap{display:none;text-align:center;width:100%;max-width:560px;}
+.result-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--accent);margin-bottom:20px;}
+.result-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.result-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;opacity:0;transform:translateY(16px);transition:all .5s ease;}
+.result-item.show{opacity:1;transform:none;}
+.result-item.gold{border-color:var(--accent);background:rgba(240,192,64,0.07);}
+.r-rank{font-family:'Bebas Neue',sans-serif;font-size:28px;min-width:36px;text-align:center;}
+.r-info{flex:1;text-align:left;}
+.r-name{font-size:14px;font-weight:500;} .r-pres{font-size:11px;color:var(--muted);}
+.r-score{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);}
+.close-btn{padding:10px 28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;}
+
+/* LOADING */
+#loadingPage{justify-content:center;align-items:center;background:var(--bg);}
+.loading-inner{text-align:center;}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-inner p{color:var(--muted);font-size:13px;}
+
+/* confetti */
+.cp{position:fixed;width:10px;height:10px;top:-20px;animation:fall linear forwards;z-index:200;border-radius:2px;}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="page active" id="loadingPage">
+  <div class="loading-inner">
+    <div class="spinner"></div>
+    <p>接続中...</p>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="page" id="setupPage">
+  <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;color:var(--accent);text-align:center;">🗳 VOTE SETUP</h1>
+    <p class="sub">4チームの情報と参加人数を設定してください</p>
+    <div id="setupTeams"></div>
+    <div class="voter-box">
+      <span class="setup-label" style="display:block;margin-bottom:8px;">投票参加人数（全員投票完了で自動結果発表）</span>
+      <input type="number" class="voter-input" id="voterCount" value="10" min="1" max="200">
+    </div>
+    <button class="btn primary" onclick="startSession()">投票セッションを開始 →</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="adminPage">
+  <div class="admin-header">
+    <h1>🗳 LIVE VOTING</h1>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <div class="badge" id="statusBadge">投票待機中</div>
+      <div class="badge" id="progressBadge">0 / 0 票</div>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="section-title">リアルタイムスコア</div>
+    <div id="teamCards"></div>
+    <div class="section-title">投票QRコード</div>
+    <div class="qr-section">
+      <div id="qrcode"></div>
+      <div class="url-box" id="voteUrlBox">URL生成中...</div>
+      <p class="qr-hint">社員はこのQRをスマホで読み取って投票します<br>このURLをそのまま共有してもOKです</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+      <button class="btn primary" onclick="revealResults()">🎉 結果発表！</button>
+      <button class="btn danger" onclick="resetAll()">リセット</button>
+    </div>
+  </div>
+</div>
+
+<!-- VOTE -->
+<div class="page" id="votePage">
+  <div class="vote-header">
+    <h1>📊 VOTE</h1>
+    <p>各企画を1〜5点で採点してください</p>
+  </div>
+  <div class="vote-body" id="voteCards"></div>
+  <div class="vote-footer">
+    <button id="submitBtn" onclick="submitVote()" disabled>全チームの採点が必要です</button>
+  </div>
+</div>
+
+<!-- THANKS -->
+<div class="page" id="thanksPage">
+  <div class="thanks-wrap">
+    <div class="thanks-icon">🙏</div>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--accent);margin-bottom:8px;">VOTED!</h2>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;">投票ありがとうございました！<br>結果発表をお楽しみに。</p>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="resultOverlay">
+  <div class="drumroll-wrap" id="drumrollWrap">
+    <h2>🥁 ドラムロール 🥁</h2>
+    <p style="color:var(--muted);margin-top:12px;font-size:13px;">集計中...</p>
+  </div>
+  <div class="result-wrap" id="resultWrap">
+    <h2>🏆 結果発表 🏆</h2>
+    <div class="result-list" id="resultList"></div>
+    <button class="close-btn" onclick="closeResult()">閉じる</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- QR Code lib -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+// =====================
+// Firebase 初期化
+// =====================
+const firebaseConfig = {
+  apiKey: "AIzaSyCqP2gmi5nWzjcmxNjgr72no-GJdOpT82c",
+  authDomain: "voteapp-c685a.firebaseapp.com",
+  databaseURL: "https://voteapp-c685a-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "voteapp-c685a",
+  storageBucket: "voteapp-c685a.firebasestorage.app",
+  messagingSenderId: "994901411796",
+  appId: "1:994901411796:web:46139c2110b32e77cdb841"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// =====================
+// 定数
+// =====================
+const LABELS = ['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
+const COLORS = ['#7c6af7','#4fa8e0','#4ec97a','#f07060'];
+const CONFETTI = ['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
+const MEDALS = ['🥇','🥈','🥉','4'];
+
+let teams = [];
+let totalVoters = 10;
+let selScores = [0,0,0,0];
+let alreadyRevealed = false;
+
+// =====================
+// ページ切替
+// =====================
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// =====================
+// SETUP ページ構築
+// =====================
+function buildSetup() {
+  const defs = [
+    {name:'AIスマートオフィス', presenter:'田中 / 佐藤'},
+    {name:'グリーンデリバリー',  presenter:'山田 / 鈴木'},
+    {name:'ヘルスケアAI',       presenter:'伊藤 / 渡辺'},
+    {name:'SNSコマース',        presenter:'中村 / 小林'},
+  ];
+  document.getElementById('setupTeams').innerHTML = defs.map((d,i) => `
+    <div class="setup-team s${i}" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+      <div class="setup-num">#${i+1}</div>
+      <span class="setup-label">企画名</span>
+      <input class="setup-input" id="tn${i}" value="${d.name}">
+      <span class="setup-label">プレゼンター</span>
+      <input class="setup-input" id="tp${i}" value="${d.presenter}">
+    </div>
+  `).join('');
+}
+
+// =====================
+// セッション開始
+// =====================
+async function startSession() {
+  teams = [];
+  for (let i = 0; i < 4; i++) {
+    teams.push({
+      name: document.getElementById('tn'+i).value || `企画${i+1}`,
+      presenter: document.getElementById('tp'+i).value || `発表者${i+1}`
+    });
+  }
+  totalVoters = parseInt(document.getElementById('voterCount').value) || 10;
+  alreadyRevealed = false;
+
+  // Firebaseに書き込み
+  await db.ref('session').set({
+    teams,
+    totalVoters,
+    active: true,
+    revealed: false,
+    createdAt: Date.now()
+  });
+  await db.ref('votes').remove();
+
+  goAdmin();
+}
+
+// =====================
+// 管理画面
+// =====================
+function goAdmin() {
+  show('adminPage');
+  buildAdminCards();
+  genQR();
+  listenVotes();
+}
+
+function buildAdminCards() {
+  document.getElementById('teamCards').innerHTML = teams.map((t,i) => `
+    <div class="team-card tc${i}" id="tc${i}">
+      <div class="tc-name">${t.name}</div>
+      <div class="tc-pres">${t.presenter}</div>
+      <div class="score-row">
+        <div class="score-avg" id="avg${i}">—</div>
+        <div class="score-detail">
+          <div class="vc-count" id="vcc${i}">0票</div>
+          <div class="bar-outer"><div class="bar-inner" id="bar${i}"></div></div>
+        </div>
+      </div>
+      <div class="sbs" id="sbs${i}">
+        ${[1,2,3,4,5].map(s=>`
+          <div class="sb-col">
+            <div class="sb-track"><div class="sb-fill" id="sf${i}_${s}" style="height:0%"></div></div>
+            <div class="sb-label">${s}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function listenVotes() {
+  db.ref('votes').on('value', snap => {
+    const data = snap.val() || {};
+    updateAdminCards(data);
+  });
+}
+
+function updateAdminCards(votesData) {
+  const all = Object.values(votesData);
+  document.getElementById('progressBadge').textContent = `${all.length} / ${totalVoters} 票`;
+  if (all.length > 0) {
+    document.getElementById('statusBadge').textContent = '投票受付中';
+    document.getElementById('statusBadge').className = 'badge open';
+  }
+
+  let avgs = [];
+  teams.forEach((t, i) => {
+    const sc = all.map(v => v.scores[i]).filter(s => s > 0);
+    const avg = sc.length ? sc.reduce((a,b)=>a+b,0)/sc.length : 0;
+    avgs.push(avg);
+    document.getElementById('avg'+i).textContent = sc.length ? avg.toFixed(2) : '—';
+    document.getElementById('vcc'+i).textContent = sc.length + '票';
+    document.getElementById('bar'+i).style.width = (avg/5*100)+'%';
+    [1,2,3,4,5].forEach(s => {
+      const cnt = sc.filter(x=>x===s).length;
+      document.getElementById(`sf${i}_${s}`).style.height = (sc.length ? cnt/sc.length*100 : 0)+'%';
+    });
+    const card = document.getElementById('tc'+i);
+    card.classList.remove('leading');
+    const lb = card.querySelector('.leading-badge');
+    if (lb) lb.remove();
+  });
+
+  if (avgs.some(a=>a>0)) {
+    const mi = avgs.indexOf(Math.max(...avgs));
+    const card = document.getElementById('tc'+mi);
+    card.classList.add('leading');
+    const b = document.createElement('div');
+    b.className = 'leading-badge'; b.textContent = '👑 LEADING';
+    card.appendChild(b);
+  }
+
+  // 全員投票完了で自動結果発表
+  if (all.length >= totalVoters && totalVoters > 0 && !alreadyRevealed) {
+    alreadyRevealed = true;
+    setTimeout(revealResults, 1000);
+  }
+}
+
+// =====================
+// QRコード生成
+// =====================
+function genQR() {
+  const url = location.href.replace(/[?#].*/, '') + '?vote=1';
+  document.getElementById('voteUrlBox').textContent = url;
+  const wrap = document.getElementById('qrcode');
+  wrap.innerHTML = '';
+  new QRCode(wrap, {
+    text: url,
+    width: 180,
+    height: 180,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+}
+
+// =====================
+// 投票ページ
+// =====================
+async function goVote() {
+  const snap = await db.ref('session').once('value');
+  const sess = snap.val();
+  if (!sess || !sess.active) {
+    show('setupPage');
+    return;
+  }
+  teams = sess.teams;
+  totalVoters = sess.totalVoters;
+  selScores = [0,0,0,0];
+
+  document.getElementById('voteCards').innerHTML = teams.map((t,i) => `
+    <div class="vote-card vc${i}">
+      <div class="vc-title">${t.name}</div>
+      <div class="vc-pres">👤 ${t.presenter}</div>
+      <div class="rating-row">
+        ${[1,2,3,4,5].map(s=>`
+          <button class="star-btn" id="vsb_${i}_${s}" onclick="pickScore(${i},${s})">
+            <span class="star-num">${s}</span>
+            <span style="font-size:9px;text-align:center;line-height:1.2;">${LABELS[s-1]}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+  checkReady();
+  show('votePage');
+}
+
+function pickScore(ti, s) {
+  selScores[ti] = s;
+  for (let x=1; x<=5; x++) {
+    const b = document.getElementById(`vsb_${ti}_${x}`);
+    if (b) b.className = 'star-btn' + (x===s ? ' sel' : '');
+  }
+  checkReady();
+}
+
+function checkReady() {
+  const all = selScores.every(s=>s>0);
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = !all;
+  btn.textContent = all ? '投票する ✓' : `残り ${selScores.filter(s=>s===0).length} チームの採点が必要です`;
+}
+
+async function submitVote() {
+  if (selScores.some(s=>s===0)) return;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+  const id = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  await db.ref('votes/' + id).set({
+    scores: selScores,
+    ts: Date.now()
+  });
+  show('thanksPage');
+}
+
+// =====================
+// 結果発表
+// =====================
+async function revealResults() {
+  const snap = await db.ref('votes').once('value');
+  const votesData = snap.val() || {};
+  const all = Object.values(votesData);
+
+  const overlay = document.getElementById('resultOverlay');
+  document.getElementById('drumrollWrap').style.display = 'block';
+  document.getElementById('resultWrap').style.display = 'none';
+  overlay.classList.add('active');
+
+  playDrumroll(() => {
+    document.getElementById('drumrollWrap').style.display = 'none';
+    document.getElementById('resultWrap').style.display = 'block';
+    showRanking(all);
+    playFanfare();
+    launchConfetti();
+  });
+}
+
+function showRanking(all) {
+  const ranked = teams.map((t,i) => {
+    const sc = all.map(v=>v.scores[i]).filter(s=>s>0);
+    return { ...t, avg: sc.length ? sc.reduce((a,b)=>a+b,0)/sc.length : 0, idx: i };
+  }).sort((a,b) => b.avg - a.avg);
+
+  document.getElementById('resultList').innerHTML = ranked.map((t,i) => `
+    <div class="result-item${i===0?' gold':''}" id="ri${i}">
+      <div class="r-rank" style="color:${i===0?'var(--accent)':COLORS[t.idx]}">${MEDALS[i]}</div>
+      <div class="r-info">
+        <div class="r-name">${t.name}</div>
+        <div class="r-pres">${t.presenter}</div>
+      </div>
+      <div class="r-score">${t.avg.toFixed(2)}</div>
+    </div>
+  `).join('');
+
+  ranked.forEach((_,i) => {
+    setTimeout(() => {
+      const el = document.getElementById('ri'+i);
+      if (el) el.classList.add('show');
+    }, 400 + i*400);
+  });
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('active');
+}
+
+async function resetAll() {
+  if (!confirm('本当にリセットしますか？')) return;
+  await db.ref('session').remove();
+  await db.ref('votes').remove();
+  alreadyRevealed = false;
+  location.href = location.pathname;
+}
+
+// =====================
+// 音声
+// =====================
+let audioCtx;
+function getAC() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playDrumroll(cb) {
+  try {
+    const ctx = getAC();
+    const dur = 3.5, start = ctx.currentTime;
+    let t = start, iv = 0.25;
+    while (t < start + dur) {
+      const buf = ctx.createBuffer(1, ctx.sampleRate*.05, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i=0;i<d.length;i++) d[i] = (Math.random()*2-1)*Math.exp(-i/200)*.8;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const g = ctx.createGain(); g.gain.value = .25;
+      src.connect(g); g.connect(ctx.destination); src.start(t);
+      iv *= .97; if (iv<.03) iv=.03; t += iv;
+    }
+    setTimeout(cb, dur*1000);
+  } catch(e) { setTimeout(cb, 2000); }
+}
+function playFanfare() {
+  try {
+    const ctx = getAC();
+    const notes = [523,659,784,1047,784,1047,1175,1047];
+    const times = [0,.2,.4,.6,.9,1.1,1.3,1.6];
+    notes.forEach((f,i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = f;
+      g.gain.setValueAtTime(.08, ctx.currentTime+times[i]);
+      g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+times[i]+.3);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime+times[i]); o.stop(ctx.currentTime+times[i]+.35);
+    });
+  } catch(e) {}
+}
+function launchConfetti() {
+  for (let i=0; i<80; i++) setTimeout(() => {
+    const e = document.createElement('div'); e.className = 'cp';
+    e.style.left = Math.random()*100+'vw';
+    e.style.background = CONFETTI[Math.floor(Math.random()*CONFETTI.length)];
+    e.style.width = (6+Math.random()*10)+'px';
+    e.style.height = (6+Math.random()*10)+'px';
+    e.style.animationDuration = (1.5+Math.random()*2)+'s';
+    e.style.animationDelay = (Math.random()*.5)+'s';
+    document.body.appendChild(e);
+    setTimeout(() => e.remove(), 4000);
+  }, Math.random()*500);
+}
+
+// =====================
+// 起動
+// =====================
+async function init() {
+  buildSetup();
+  const params = new URLSearchParams(location.search);
+
+  if (params.get('vote') === '1') {
+    // 投票者モード
+    await goVote();
+    return;
+  }
+
+  // 管理者モード：既存セッションがあれば復元
+  const snap = await db.ref('session').once('value');
+  const sess = snap.val();
+  if (sess && sess.active) {
+    teams = sess.teams;
+    totalVoters = sess.totalVoters;
+    sess.teams.forEach((t,i) => {
+      const tn = document.getElementById('tn'+i);
+      const tp = document.getElementById('tp'+i);
+      if (tn) tn.value = t.name;
+      if (tp) tp.value = t.presenter;
+    });
+    document.getElementById('voterCount').value = totalVoters;
+    goAdmin();
+  } else {
+    show('setupPage');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
