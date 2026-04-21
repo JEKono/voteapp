@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>プレゼン投票</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Bebas+Neue&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;
   --border:rgba(255,255,255,0.08);--accent:#f0c040;--accent2:#e05a5a;
-  --text:#f0eee8;--muted:#888;
+  --text:#f0eee8;--muted:#aaa;
   --c1:#7c6af7;--c2:#4fa8e0;--c3:#4ec97a;--c4:#f07060;
+  /* 点数ごとの色 */
+  --s1:#e05a5a;--s2:#e07a30;--s3:#e0c030;--s4:#80c040;--s5:#40c890;
 }
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 .page{display:none;min-height:100vh;flex-direction:column;}
@@ -19,107 +21,126 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 /* LOADING */
 #loadingPage{justify-content:center;align-items:center;}
-.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+.spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+#loadingPage p{font-size:18px;color:var(--muted);}
 
 /* SETUP */
-#setupPage{padding:24px;gap:14px;align-items:stretch;}
-.sub{font-size:12px;color:var(--muted);text-align:center;}
-.setup-team{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
-.setup-num{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+#setupPage{padding:28px;gap:16px;align-items:stretch;}
+#setupPage h1{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:4px;color:var(--accent);text-align:center;}
+.sub{font-size:16px;color:var(--muted);text-align:center;}
+.setup-team{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.setup-num{font-family:'Bebas Neue',sans-serif;font-size:22px;}
 .s0 .setup-num{color:var(--c1);}.s1 .setup-num{color:var(--c2);}.s2 .setup-num{color:var(--c3);}.s3 .setup-num{color:var(--c4);}
-.setup-label{font-size:11px;color:var(--muted);margin-top:4px;}
-.setup-input{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;}
+.setup-label{font-size:14px;color:var(--muted);margin-top:4px;}
+.setup-input{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;}
 .setup-input:focus{outline:none;border-color:var(--accent);}
-.btn{padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;text-align:center;width:100%;}
+.btn{padding:16px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;cursor:pointer;transition:all .2s;text-align:center;width:100%;}
 .btn:hover{background:rgba(255,255,255,0.08);}
-.btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;}
+.btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;font-size:18px;}
 .btn.primary:hover{background:#ffd060;}
-.btn.danger{border-color:rgba(224,90,90,0.4);color:var(--accent2);}
-.btn.end-vote{background:rgba(224,90,90,0.15);border-color:rgba(224,90,90,0.5);color:#ff8080;font-weight:700;font-size:14px;padding:14px;}
+.btn.danger{border-color:rgba(224,90,90,0.4);color:var(--accent2);font-size:15px;}
+.btn.end-vote{background:rgba(224,90,90,0.15);border-color:rgba(224,90,90,0.5);color:#ff8080;font-weight:700;font-size:17px;padding:16px;}
 .btn.end-vote:hover{background:rgba(224,90,90,0.25);}
 
 /* ADMIN */
 #adminPage{background:var(--bg);}
-.admin-header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-.admin-header h1{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--accent);}
-.badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);}
+.admin-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.admin-header h1{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--accent);}
+.badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 16px;font-size:15px;color:var(--muted);}
 .badge.open{color:#4ec97a;border-color:rgba(78,201,122,0.3);}
-.admin-body{padding:14px;display:flex;flex-direction:column;gap:12px;flex:1;}
-.section-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+.admin-body{padding:16px;display:flex;flex-direction:column;gap:14px;flex:1;}
+.section-title{font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px;font-weight:500;}
 
-/* 縦棒グラフ */
-.bar-chart{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 12px 12px;}
-.chart-area{display:flex;align-items:flex-end;gap:6px;height:180px;}
-.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.chart-bar-wrap{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;}
-.chart-score{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);line-height:1;}
-.chart-bar{width:80%;border-radius:4px 4px 0 0;transition:height .7s cubic-bezier(.4,0,.2,1);min-height:3px;}
-.chart-bar.c0{background:var(--c1);}.chart-bar.c1{background:var(--c2);}.chart-bar.c2{background:var(--c3);}.chart-bar.c3{background:var(--c4);}
-.chart-bar.top{filter:brightness(1.2);}
-.chart-baseline{height:1px;background:var(--border);margin:4px 0 8px;}
-.chart-entry{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--muted);}
-.chart-label{font-size:9px;color:var(--muted);text-align:center;line-height:1.4;word-break:break-all;}
-.chart-votes{font-size:9px;color:var(--muted);}
+/* 積み上げ棒グラフ */
+.bar-chart{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 16px 16px;}
+.chart-area{display:flex;align-items:flex-end;gap:10px;height:220px;}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.chart-bar-wrap{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;}
+.chart-score-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--text);line-height:1;}
+/* 積み上げバー本体 */
+.stacked-bar{width:88%;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;border-radius:5px 5px 0 0;transition:height .7s cubic-bezier(.4,0,.2,1);}
+.stack-seg{width:100%;transition:height .6s cubic-bezier(.4,0,.2,1);min-height:0;}
+.stack-seg.sc1{background:var(--s1);}
+.stack-seg.sc2{background:var(--s2);}
+.stack-seg.sc3{background:var(--s3);}
+.stack-seg.sc4{background:var(--s4);}
+.stack-seg.sc5{background:var(--s5);}
+.chart-bar.top .stacked-bar{box-shadow:0 0 14px rgba(255,255,255,0.15);}
+.chart-baseline{height:1px;background:var(--border);margin:6px 0 10px;}
+.chart-entry{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--muted);}
+.chart-label{font-size:11px;color:var(--muted);text-align:center;line-height:1.4;word-break:break-all;}
+.chart-votes{font-size:11px;color:var(--muted);}
 
-.qr-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.qr-hint{font-size:11px;color:var(--muted);text-align:center;line-height:1.7;}
-.open-qr-btn{background:rgba(78,201,122,0.12);border:1px solid rgba(78,201,122,0.4);color:#4ec97a;padding:10px 20px;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;font-weight:500;width:100%;text-align:center;}
+/* 凡例 */
+.chart-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;justify-content:center;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+.legend-dot{width:12px;height:12px;border-radius:2px;}
+
+.qr-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.qr-hint{font-size:14px;color:var(--muted);text-align:center;line-height:1.7;}
+.open-qr-btn{background:rgba(78,201,122,0.12);border:1px solid rgba(78,201,122,0.4);color:#4ec97a;padding:14px 20px;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:16px;cursor:pointer;font-weight:700;width:100%;text-align:center;}
 .open-qr-btn:hover{background:rgba(78,201,122,0.2);}
-.url-box{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:10px;color:var(--muted);word-break:break-all;text-align:center;width:100%;}
+.url-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);word-break:break-all;text-align:center;width:100%;}
 
 /* VOTE */
 #votePage{background:var(--bg);}
-.vote-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;text-align:center;}
-.vote-header h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--accent);}
-.vote-header p{font-size:11px;color:var(--muted);margin-top:2px;}
-.vote-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:10px;}
-.vote-card{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden;}
-.vote-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
+.vote-header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 20px;text-align:center;}
+.vote-header h1{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--accent);}
+.vote-header p{font-size:15px;color:var(--muted);margin-top:4px;}
+.vote-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+.vote-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.vote-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;}
 .vc0::before{background:var(--c1);}.vc1::before{background:var(--c2);}.vc2::before{background:var(--c3);}.vc3::before{background:var(--c4);}
-.vc-entry{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--muted);margin-bottom:2px;}
-.vc-title{font-size:14px;font-weight:500;}.vc-pres{font-size:11px;color:var(--muted);margin-bottom:8px;}
-.rating-row{display:flex;gap:5px;}
-.star-btn{flex:1;padding:9px 2px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--muted);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s;-webkit-tap-highlight-color:transparent;}
-.star-num{font-size:15px;font-weight:500;color:var(--text);}
+.vc-entry{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--muted);margin-bottom:3px;}
+.vc-title{font-size:18px;font-weight:700;margin-bottom:2px;}
+.vc-pres{font-size:14px;color:var(--muted);margin-bottom:12px;}
+.rating-row{display:flex;gap:6px;}
+.star-btn{flex:1;padding:12px 2px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--muted);font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.star-num{font-size:20px;font-weight:700;color:var(--text);}
+.star-lbl{font-size:9px;text-align:center;line-height:1.3;}
 .star-btn.sel,.star-btn:hover{border-color:var(--accent);background:rgba(240,192,64,0.12);color:var(--accent);}
 .star-btn.sel .star-num,.star-btn:hover .star-num{color:var(--accent);}
-.vote-footer{padding:12px 14px 32px;}
-#submitBtn{width:100%;padding:15px;border-radius:10px;border:none;background:var(--accent);color:#000;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.vote-footer{padding:14px 16px 36px;}
+#submitBtn{width:100%;padding:18px;border-radius:12px;border:none;background:var(--accent);color:#000;font-family:'Noto Sans JP',sans-serif;font-size:18px;font-weight:700;cursor:pointer;transition:all .2s;}
 #submitBtn:hover{background:#ffd060;}
 #submitBtn:active{transform:scale(.98);}
 #submitBtn:disabled{background:var(--muted);cursor:not-allowed;}
 
 /* 締切・Thanks */
 #closedPage,#thanksPage{justify-content:center;align-items:center;}
-.center-wrap{text-align:center;padding:32px;}
+.center-wrap{text-align:center;padding:40px 32px;}
+.center-wrap .icon{font-size:80px;margin-bottom:20px;}
+.center-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:3px;margin-bottom:12px;}
+.center-wrap p{font-size:18px;color:var(--muted);line-height:2;}
 
 /* RESULT OVERLAY — 全画面 */
-#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:16px 20px;}
+#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
 #resultOverlay.active{display:flex;}
 .drumroll-wrap{text-align:center;}
-.drumroll-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,9vw,80px);letter-spacing:4px;color:var(--accent);animation:pulse .25s infinite alternate;}
-@keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.03);}}
-#resultWrap{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;}
-.result-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,6vw,60px);letter-spacing:4px;color:var(--accent);margin-bottom:clamp(10px,2vh,24px);text-align:center;}
-.result-list{display:flex;flex-direction:column;gap:clamp(6px,1.2vh,14px);width:100%;max-width:760px;}
-.result-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(10px,1.8vh,18px) clamp(14px,2.5vw,24px);display:flex;align-items:center;gap:clamp(10px,1.8vw,20px);opacity:0;transform:translateX(-50px);transition:all .65s cubic-bezier(.4,0,.2,1);}
+.drumroll-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,10vw,90px);letter-spacing:5px;color:var(--accent);animation:pulse .25s infinite alternate;}
+.drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
+@keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}
+#resultWrap{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;max-height:100vh;overflow:hidden;}
+.result-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,7vw,72px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(12px,2.5vh,28px);text-align:center;}
+.result-list{display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);width:100%;max-width:820px;}
+.result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,22px) clamp(16px,3vw,28px);display:flex;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);}
 .result-item.show{opacity:1;transform:none;}
-.result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.06);}
+.result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.07);}
 .result-item.silver{border-color:rgba(192,192,210,0.5);}
 .result-item.bronze{border-color:rgba(200,130,60,0.5);}
-.r-rank{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5.5vw,60px);min-width:clamp(44px,5vw,68px);text-align:center;line-height:1;}
-.r-entry{font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,1.4vw,16px);color:var(--muted);display:block;}
-.r-name{font-size:clamp(15px,2.8vw,26px);font-weight:700;line-height:1.3;}
-.r-pres{font-size:clamp(11px,1.4vw,15px);color:var(--muted);margin-top:2px;}
+.r-rank{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,68px);min-width:clamp(48px,6vw,76px);text-align:center;line-height:1;}
+.r-entry{font-family:'Bebas Neue',sans-serif;font-size:clamp(13px,1.6vw,18px);color:var(--muted);display:block;}
+.r-name{font-size:clamp(17px,3vw,30px);font-weight:700;line-height:1.3;}
+.r-pres{font-size:clamp(13px,1.6vw,17px);color:var(--muted);margin-top:3px;}
 .r-info{flex:1;}
-.r-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6.5vw,68px);color:var(--accent);line-height:1;}
-.r-score-label{font-size:clamp(9px,1.1vw,12px);color:var(--muted);text-align:right;}
+.r-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,7vw,76px);color:var(--accent);line-height:1;}
+.r-score-label{font-size:clamp(11px,1.2vw,14px);color:var(--muted);text-align:right;}
 .r-score-wrap{text-align:right;}
-.close-btn{margin-top:clamp(10px,1.8vh,20px);padding:10px 32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;cursor:pointer;}
+.close-btn{margin-top:clamp(12px,2vh,22px);padding:12px 36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;cursor:pointer;}
 
 /* confetti */
-.cp{position:fixed;width:10px;height:10px;top:-20px;animation:fall linear forwards;z-index:200;border-radius:2px;}
+.cp{position:fixed;top:-20px;animation:fall linear forwards;z-index:200;border-radius:2px;}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
 </style>
 </head>
@@ -129,14 +150,14 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <div class="page active" id="loadingPage">
   <div style="text-align:center;">
     <div class="spinner"></div>
-    <p style="color:var(--muted);font-size:13px;">接続中...</p>
+    <p>接続中...</p>
   </div>
 </div>
 
 <!-- SETUP -->
 <div class="page" id="setupPage">
-  <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
-    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;color:var(--accent);text-align:center;">🗳 VOTE SETUP</h1>
+  <div style="padding:28px;display:flex;flex-direction:column;gap:16px;">
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:4px;color:var(--accent);text-align:center;">🗳 VOTE SETUP</h1>
     <p class="sub">4チームの企画名とプレゼンター名を入力してください</p>
     <div id="setupTeams"></div>
     <button class="btn primary" onclick="startSession()">投票セッションを開始 →</button>
@@ -147,16 +168,23 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <div class="page" id="adminPage">
   <div class="admin-header">
     <h1>🗳 LIVE VOTING</h1>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <div class="badge open" id="statusBadge">受付中</div>
       <div class="badge" id="progressBadge">0 票</div>
     </div>
   </div>
   <div class="admin-body">
-    <div class="section-title">リアルタイムスコア（合計点）</div>
+    <div class="section-title">リアルタイムスコア（積み上げ合計点）</div>
     <div class="bar-chart">
       <div class="chart-area" id="chartArea"></div>
       <div class="chart-baseline"></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--s1)"></div>1点</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--s2)"></div>2点</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--s3)"></div>3点</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--s4)"></div>4点</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--s5)"></div>5点</div>
+      </div>
     </div>
     <div class="section-title">投票QRコード</div>
     <div class="qr-section">
@@ -164,7 +192,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <button class="open-qr-btn" onclick="openQRTab()">📱 QRコードを別タブで表示</button>
       <p class="qr-hint">別タブで開いたQRをモニターに投影してください</p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
       <button class="btn end-vote" onclick="endVoting()">🛑 投票を締め切る</button>
       <button class="btn primary" onclick="revealResults()">🎉 結果発表！</button>
       <button class="btn danger" onclick="resetAll()">リセット</button>
@@ -187,18 +215,18 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <!-- 締切 -->
 <div class="page" id="closedPage">
   <div class="center-wrap">
-    <div style="font-size:64px;margin-bottom:16px;">🔒</div>
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--accent2);margin-bottom:8px;">投票は締め切られました</h2>
-    <p style="color:var(--muted);font-size:13px;line-height:1.8;">ご参加ありがとうございました。<br>結果発表をお楽しみに。</p>
+    <div class="icon">🔒</div>
+    <h2 style="color:var(--accent2);">投票は締め切られました</h2>
+    <p>ご参加ありがとうございました。<br>結果発表をお楽しみに。</p>
   </div>
 </div>
 
 <!-- THANKS -->
 <div class="page" id="thanksPage">
   <div class="center-wrap">
-    <div style="font-size:64px;margin-bottom:16px;">🙏</div>
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--accent);margin-bottom:8px;">VOTED!</h2>
-    <p style="color:var(--muted);font-size:13px;line-height:1.8;">投票ありがとうございました！<br>結果発表をお楽しみに。</p>
+    <div class="icon">🙏</div>
+    <h2 style="color:var(--accent);">VOTED!</h2>
+    <p>投票ありがとうございました！<br>結果発表をお楽しみに。</p>
   </div>
 </div>
 
@@ -206,7 +234,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <div id="resultOverlay">
   <div class="drumroll-wrap" id="drumrollWrap">
     <h2>🥁 ドラムロール 🥁</h2>
-    <p style="color:var(--muted);margin-top:16px;font-size:clamp(14px,2vw,20px);">集計中...</p>
+    <p>集計中...</p>
   </div>
   <div id="resultWrap">
     <div class="result-title">🏆 結果発表 🏆</div>
@@ -219,33 +247,32 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCqP2gmi5nWzjcmxNjgr72no-GJdOpT82c",
-  authDomain: "voteapp-c685a.firebaseapp.com",
-  databaseURL: "https://voteapp-c685a-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "voteapp-c685a",
-  storageBucket: "voteapp-c685a.firebasestorage.app",
-  messagingSenderId: "994901411796",
-  appId: "1:994901411796:web:46139c2110b32e77cdb841"
+const firebaseConfig={
+  apiKey:"AIzaSyCqP2gmi5nWzjcmxNjgr72no-GJdOpT82c",
+  authDomain:"voteapp-c685a.firebaseapp.com",
+  databaseURL:"https://voteapp-c685a-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"voteapp-c685a",
+  storageBucket:"voteapp-c685a.firebasestorage.app",
+  messagingSenderId:"994901411796",
+  appId:"1:994901411796:web:46139c2110b32e77cdb841"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
-const LABELS = ['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
-const COLORS = ['#7c6af7','#4fa8e0','#4ec97a','#f07060'];
-const CONFETTI = ['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
-const MEDALS = ['🥇','🥈','🥉','4'];
+const LABELS=['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
+const COLORS=['#7c6af7','#4fa8e0','#4ec97a','#f07060'];
+const SCORE_COLORS=['#e05a5a','#e07a30','#e0c030','#80c040','#40c890'];
+const CONFETTI=['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
+const MEDALS=['🥇','🥈','🥉','4'];
 
-let teams=[], selScores=[0,0,0,0], voteUrl='';
+let teams=[],selScores=[0,0,0,0],voteUrl='';
 
 function show(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// =====================
-// SETUP
-// =====================
+// ===================== SETUP =====================
 function buildSetup(){
   const defs=[
     {name:'AIスマートオフィス',presenter:'田中 / 佐藤'},
@@ -266,15 +293,16 @@ function buildSetup(){
 
 async function startSession(){
   teams=[];
-  for(let i=0;i<4;i++) teams.push({name:document.getElementById('tn'+i).value||`企画${i+1}`,presenter:document.getElementById('tp'+i).value||`発表者${i+1}`});
+  for(let i=0;i<4;i++) teams.push({
+    name:document.getElementById('tn'+i).value||`企画${i+1}`,
+    presenter:document.getElementById('tp'+i).value||`発表者${i+1}`
+  });
   await db.ref('session').set({teams,active:true,closed:false,createdAt:Date.now()});
   await db.ref('votes').remove();
   goAdmin();
 }
 
-// =====================
-// ADMIN
-// =====================
+// ===================== ADMIN =====================
 function goAdmin(){
   show('adminPage');
   buildChart();
@@ -284,11 +312,14 @@ function goAdmin(){
 }
 
 function buildChart(){
+  // グラフ最大値：全員が5点を投票した場合を想定して動的に計算
   document.getElementById('chartArea').innerHTML=teams.map((t,i)=>`
     <div class="chart-col">
       <div class="chart-bar-wrap">
-        <div class="chart-score" id="cscore${i}">0</div>
-        <div class="chart-bar c${i}" id="cbar${i}" style="height:3px;width:100%;"></div>
+        <div class="chart-score-num" id="cscore${i}">0</div>
+        <div style="width:88%;display:flex;flex-direction:column;justify-content:flex-end;height:100%;align-items:stretch;" id="cbarwrap${i}">
+          <!-- セグメントはJS側で生成 -->
+        </div>
       </div>
       <div class="chart-entry">No.${i+1}</div>
       <div class="chart-label">${t.name}</div>
@@ -304,23 +335,62 @@ function listenVotes(){
 function updateChart(data){
   const all=Object.values(data);
   document.getElementById('progressBadge').textContent=`${all.length} 票`;
-  const totals=teams.map((_,i)=>{
-    const sc=all.map(v=>v.scores[i]).filter(s=>s>0);
-    return{total:sc.reduce((a,b)=>a+b,0),count:sc.length};
+
+  // 各チームの点数別カウント・合計を計算
+  const stats=teams.map((_,i)=>{
+    const scoreCounts=[0,0,0,0,0]; // index 0=1点,1=2点,...
+    let total=0,count=0;
+    all.forEach(v=>{
+      const s=v.scores[i];
+      if(s>0){scoreCounts[s-1]++;total+=s;count++;}
+    });
+    return{scoreCounts,total,count};
   });
-  const maxT=Math.max(...totals.map(t=>t.total),1);
-  totals.forEach((t,i)=>{
-    const pct=Math.max(t.total/maxT*100,2);
-    document.getElementById('cbar'+i).style.height=pct+'%';
-    document.getElementById('cbar'+i).classList.toggle('top',t.total===maxT&&t.total>0);
-    document.getElementById('cscore'+i).textContent=t.total;
-    document.getElementById('cvotes'+i).textContent=t.count+'票';
+
+  const maxTotal=Math.max(...stats.map(s=>s.total),1);
+  // グラフ高さのベース（px換算は%で対応）
+  const MAX_PCT=100;
+
+  stats.forEach((st,i)=>{
+    document.getElementById('cscore'+i).textContent=st.total;
+    document.getElementById('cvotes'+i).textContent=st.count+'票';
+
+    const wrap=document.getElementById('cbarwrap'+i);
+    // 積み上げバーをクリアして再描画
+    wrap.innerHTML='';
+
+    if(st.total===0){
+      // 空バー
+      const empty=document.createElement('div');
+      empty.style.cssText='width:100%;height:3px;background:var(--surface2);border-radius:4px 4px 0 0;';
+      wrap.appendChild(empty);
+      return;
+    }
+
+    const totalPct=st.total/maxTotal*MAX_PCT;
+
+    // 5点→1点の順に上から積み上げ（視覚的に下が1点・上が5点になるよう逆順）
+    // flexboxのcolumnで下から積み上げるため、1点が一番下＝最後にappend
+    // → 配列を5→1の順でappendすると画面上は5点が上
+    for(let sc=5;sc>=1;sc--){
+      const cnt=st.scoreCounts[sc-1];
+      if(cnt===0) continue;
+      const seg=document.createElement('div');
+      seg.className=`stack-seg sc${sc}`;
+      // このセグメントの高さ = (cnt*sc / total) * totalPct %
+      const segPct=(cnt*sc/st.total)*totalPct;
+      seg.style.height=Math.max(segPct,1)+'%';
+      seg.style.transition='height .6s cubic-bezier(.4,0,.2,1)';
+      wrap.appendChild(seg);
+    }
+
+    // トップのバーを光らせる
+    const isTop=st.total===maxTotal&&st.total>0;
+    wrap.style.filter=isTop?'brightness(1.15)':'';
   });
 }
 
-// =====================
-// QR 別タブ
-// =====================
+// ===================== QR =====================
 function openQRTab(){
   const url=voteUrl;
   const win=window.open('','_blank');
@@ -328,19 +398,17 @@ function openQRTab(){
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>投票QRコード</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:40px;}.label{font-size:28px;font-weight:700;color:#111;letter-spacing:3px;margin-bottom:28px;}#qr{background:#fff;padding:12px;border:2px solid #eee;border-radius:8px;display:inline-block;}.url{font-size:14px;color:#333;margin-top:24px;word-break:break-all;text-align:center;max-width:360px;line-height:1.8;border-top:1px solid #eee;padding-top:16px;}</style>
+<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:40px;}.label{font-size:32px;font-weight:700;color:#111;letter-spacing:3px;margin-bottom:32px;}#qr{background:#fff;padding:14px;border:2px solid #eee;border-radius:10px;display:inline-block;}.url{font-size:16px;color:#333;margin-top:28px;word-break:break-all;text-align:center;max-width:400px;line-height:2;border-top:1px solid #eee;padding-top:20px;}</style>
 </head><body>
 <div class="label">投票用URL</div>
 <div id="qr"></div>
 <div class="url">${url}</div>
-<script>new QRCode(document.getElementById('qr'),{text:'${url}',width:300,height:300,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});<\/script>
+<script>new QRCode(document.getElementById('qr'),{text:'${url}',width:320,height:320,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});<\/script>
 </body></html>`);
   win.document.close();
 }
 
-// =====================
-// 投票締め切り
-// =====================
+// ===================== 締め切り =====================
 async function endVoting(){
   if(!confirm('投票を締め切りますか？')) return;
   await db.ref('session/closed').set(true);
@@ -349,9 +417,7 @@ async function endVoting(){
   alert('投票を締め切りました。「結果発表！」ボタンで結果を表示できます。');
 }
 
-// =====================
-// 投票ページ
-// =====================
+// ===================== 投票ページ =====================
 async function goVote(){
   const snap=await db.ref('session').once('value');
   const sess=snap.val();
@@ -368,7 +434,7 @@ async function goVote(){
         ${[1,2,3,4,5].map(s=>`
           <button class="star-btn" id="vsb_${i}_${s}" onclick="pickScore(${i},${s})">
             <span class="star-num">${s}</span>
-            <span style="font-size:9px;text-align:center;line-height:1.2;">${LABELS[s-1]}</span>
+            <span class="star-lbl">${LABELS[s-1]}</span>
           </button>
         `).join('')}
       </div>
@@ -400,9 +466,7 @@ async function submitVote(){
   show('thanksPage');
 }
 
-// =====================
-// 結果発表
-// =====================
+// ===================== 結果発表 =====================
 async function revealResults(){
   const snap=await db.ref('votes').once('value');
   const all=Object.values(snap.val()||{});
@@ -423,10 +487,8 @@ function showRanking(all){
     const sc=all.map(v=>v.scores[i]).filter(s=>s>0);
     return{...t,total:sc.reduce((a,b)=>a+b,0),count:sc.length,idx:i};
   }).sort((a,b)=>b.total-a.total);
-
   const medalClass=['gold','silver','bronze',''];
   const medalColor=['var(--accent)','#c0c0d0','#cd7f32','var(--muted)'];
-
   document.getElementById('resultList').innerHTML=ranked.map((t,i)=>`
     <div class="result-item ${medalClass[i]}" id="ri${i}">
       <div class="r-rank" style="color:${medalColor[i]}">${MEDALS[i]}</div>
@@ -441,7 +503,6 @@ function showRanking(all){
       </div>
     </div>
   `).join('');
-
   ranked.forEach((_,i)=>{
     setTimeout(()=>{const el=document.getElementById('ri'+i);if(el)el.classList.add('show');},600+i*550);
   });
@@ -456,127 +517,76 @@ async function resetAll(){
   location.href=location.pathname;
 }
 
-// =====================
-// 音声：本格ドラムロール＋ファンファーレ
-// =====================
+// ===================== 音声 =====================
 let audioCtx;
-function getAC(){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
+function getAC(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 
-// ドロロロロロ→ドンッ
 function playDrumroll(cb){
   try{
-    const ctx=getAC();
-    const now=ctx.currentTime;
-    const totalDur=4.2;
-
-    // スネアロール（だんだん速く）
-    let t=now, iv=0.20;
-    while(t < now+totalDur-0.25){
-      // ノイズバースト（スネア）
+    const ctx=getAC(),now=ctx.currentTime,total=4.2;
+    let t=now,iv=0.20;
+    while(t<now+total-0.25){
       const blen=Math.floor(ctx.sampleRate*0.07);
       const buf=ctx.createBuffer(1,blen,ctx.sampleRate);
       const d=buf.getChannelData(0);
       for(let j=0;j<blen;j++) d[j]=(Math.random()*2-1)*Math.pow(1-j/blen,1.2);
-      const src=ctx.createBufferSource(); src.buffer=buf;
+      const src=ctx.createBufferSource();src.buffer=buf;
       const g=ctx.createGain();
-      g.gain.setValueAtTime(0.35,t);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
-      const hpf=ctx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=1500;
-      src.connect(hpf); hpf.connect(g); g.connect(ctx.destination);
-      src.start(t);
-
-      // トーン成分
-      const osc=ctx.createOscillator();
-      const og=ctx.createGain();
-      osc.frequency.setValueAtTime(220,t);
-      osc.frequency.exponentialRampToValueAtTime(80,t+0.05);
-      og.gain.setValueAtTime(0.12,t);
-      og.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-      osc.connect(og); og.connect(ctx.destination);
-      osc.start(t); osc.stop(t+0.07);
-
-      iv*=0.952; if(iv<0.022) iv=0.022;
-      t+=iv;
+      g.gain.setValueAtTime(0.35,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+      const hpf=ctx.createBiquadFilter();hpf.type='highpass';hpf.frequency.value=1500;
+      src.connect(hpf);hpf.connect(g);g.connect(ctx.destination);src.start(t);
+      const osc=ctx.createOscillator(),og=ctx.createGain();
+      osc.frequency.setValueAtTime(220,t);osc.frequency.exponentialRampToValueAtTime(80,t+0.05);
+      og.gain.setValueAtTime(0.12,t);og.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      osc.connect(og);og.connect(ctx.destination);osc.start(t);osc.stop(t+0.07);
+      iv*=0.952;if(iv<0.022)iv=0.022;t+=iv;
     }
-
-    // 最後のドンッ（バスドラム）
-    const bd=ctx.createOscillator();
-    const bdg=ctx.createGain();
-    bd.frequency.setValueAtTime(160,now+totalDur-0.1);
-    bd.frequency.exponentialRampToValueAtTime(35,now+totalDur+0.3);
-    bdg.gain.setValueAtTime(0.9,now+totalDur-0.1);
-    bdg.gain.exponentialRampToValueAtTime(0.001,now+totalDur+0.4);
-    bd.connect(bdg); bdg.connect(ctx.destination);
-    bd.start(now+totalDur-0.1); bd.stop(now+totalDur+0.5);
-
-    setTimeout(cb,totalDur*1000);
+    const bd=ctx.createOscillator(),bdg=ctx.createGain();
+    bd.frequency.setValueAtTime(160,now+total-0.1);bd.frequency.exponentialRampToValueAtTime(35,now+total+0.3);
+    bdg.gain.setValueAtTime(0.9,now+total-0.1);bdg.gain.exponentialRampToValueAtTime(0.001,now+total+0.4);
+    bd.connect(bdg);bdg.connect(ctx.destination);bd.start(now+total-0.1);bd.stop(now+total+0.5);
+    setTimeout(cb,total*1000);
   }catch(e){setTimeout(cb,2000);}
 }
 
-// ジャジャジャジャーン
 function playFanfare(){
   try{
-    const ctx=getAC();
-    const now=ctx.currentTime;
-
-    // 前奏：ジャ・ジャ・ジャ（短く3回）
-    [[523,0],[659,0.18],[784,0.36]].forEach(([f,t])=>{
-      playChord(ctx,now+t,[f,f*1.25,f*1.5],0.12,0.13);
-    });
-
-    // メイン：ジャーン（長め・和音）
+    const ctx=getAC(),now=ctx.currentTime;
+    [[523,0],[659,0.18],[784,0.36]].forEach(([f,t])=>playChord(ctx,now+t,[f,f*1.25,f*1.5],0.12,0.13));
     playChord(ctx,now+0.56,[523,659,784,1047],0.18,0.9);
-
-    // シンバル
-    const clen=Math.floor(ctx.sampleRate*1.2);
-    const cbuf=ctx.createBuffer(1,clen,ctx.sampleRate);
-    const cd=cbuf.getChannelData(0);
+    const clen=Math.floor(ctx.sampleRate*1.2),cbuf=ctx.createBuffer(1,clen,ctx.sampleRate),cd=cbuf.getChannelData(0);
     for(let i=0;i<clen;i++) cd[i]=(Math.random()*2-1)*Math.pow(1-i/clen,0.6);
-    const csrc=ctx.createBufferSource(); csrc.buffer=cbuf;
-    const hpf=ctx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=7000;
+    const csrc=ctx.createBufferSource();csrc.buffer=cbuf;
+    const hpf=ctx.createBiquadFilter();hpf.type='highpass';hpf.frequency.value=7000;
     const cg=ctx.createGain();
-    cg.gain.setValueAtTime(0.35,now+0.56);
-    cg.gain.exponentialRampToValueAtTime(0.001,now+1.8);
-    csrc.connect(hpf); hpf.connect(cg); cg.connect(ctx.destination);
-    csrc.start(now+0.56);
+    cg.gain.setValueAtTime(0.35,now+0.56);cg.gain.exponentialRampToValueAtTime(0.001,now+1.8);
+    csrc.connect(hpf);hpf.connect(cg);cg.connect(ctx.destination);csrc.start(now+0.56);
   }catch(e){}
 }
-
-function playChord(ctx,startTime,freqs,vol,dur){
+function playChord(ctx,st,freqs,vol,dur){
   freqs.forEach(f=>{
-    const osc=ctx.createOscillator();
-    const g=ctx.createGain();
-    const filt=ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=3000;
-    osc.type='sawtooth'; osc.frequency.value=f;
-    g.gain.setValueAtTime(0,startTime);
-    g.gain.linearRampToValueAtTime(vol/freqs.length,startTime+0.02);
-    g.gain.setValueAtTime(vol/freqs.length,startTime+dur-0.04);
-    g.gain.linearRampToValueAtTime(0,startTime+dur);
-    osc.connect(filt); filt.connect(g); g.connect(ctx.destination);
-    osc.start(startTime); osc.stop(startTime+dur+0.05);
+    const osc=ctx.createOscillator(),g=ctx.createGain(),filt=ctx.createBiquadFilter();
+    filt.type='lowpass';filt.frequency.value=3000;osc.type='sawtooth';osc.frequency.value=f;
+    g.gain.setValueAtTime(0,st);g.gain.linearRampToValueAtTime(vol/freqs.length,st+0.02);
+    g.gain.setValueAtTime(vol/freqs.length,st+dur-0.04);g.gain.linearRampToValueAtTime(0,st+dur);
+    osc.connect(filt);filt.connect(g);g.connect(ctx.destination);osc.start(st);osc.stop(st+dur+0.05);
   });
 }
 
 function launchConfetti(){
   for(let i=0;i<120;i++) setTimeout(()=>{
-    const e=document.createElement('div'); e.className='cp';
+    const e=document.createElement('div');e.className='cp';
     e.style.left=Math.random()*100+'vw';
     e.style.background=CONFETTI[Math.floor(Math.random()*CONFETTI.length)];
-    e.style.width=(6+Math.random()*12)+'px';
-    e.style.height=(6+Math.random()*12)+'px';
+    const sz=(7+Math.random()*12)+'px';
+    e.style.width=sz;e.style.height=sz;
     e.style.animationDuration=(2+Math.random()*2.5)+'s';
     e.style.animationDelay=(Math.random()*.8)+'s';
-    document.body.appendChild(e);
-    setTimeout(()=>e.remove(),5000);
+    document.body.appendChild(e);setTimeout(()=>e.remove(),5000);
   },Math.random()*600);
 }
 
-// =====================
-// 起動
-// =====================
+// ===================== 起動 =====================
 async function init(){
   buildSetup();
   const params=new URLSearchParams(location.search);
@@ -586,17 +596,12 @@ async function init(){
   if(sess&&sess.active){
     teams=sess.teams;
     sess.teams.forEach((t,i)=>{
-      const tn=document.getElementById('tn'+i);
-      const tp=document.getElementById('tp'+i);
-      if(tn)tn.value=t.name;
-      if(tp)tp.value=t.presenter;
+      const tn=document.getElementById('tn'+i),tp=document.getElementById('tp'+i);
+      if(tn)tn.value=t.name;if(tp)tp.value=t.presenter;
     });
     goAdmin();
-  }else{
-    show('setupPage');
-  }
+  }else{show('setupPage');}
 }
-
 init();
 </script>
 </body>
