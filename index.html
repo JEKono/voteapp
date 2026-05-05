@@ -301,6 +301,8 @@ async function startSession(){
   await db.ref('session').set({teams,active:true,closed:false,createdAt:Date.now()});
   await db.ref('votes').remove();
   goAdmin();
+  // ユーザー操作直後なのでAutoplay制限なしに再生可能
+  playLiveBGM();
 }
 
 function goAdmin(){
@@ -309,8 +311,6 @@ function goAdmin(){
   voteUrl=location.origin+location.pathname+'?vote=1';
   genQRInline();
   listenVotes();
-  // 投票ライブBGMを再生
-  playLiveBGM();
 }
 
 function playLiveBGM(){
@@ -607,6 +607,11 @@ async function init(){
       if(tn)tn.value=t.name;if(tp)tp.value=t.presenter;
     });
     goAdmin();
+    // 既存セッション復元時：画面クリックでBGM開始
+    document.addEventListener('click', function startOnClick(){
+      playLiveBGM();
+      document.removeEventListener('click', startOnClick);
+    }, {once:true});
   }else{show('setupPage');}
 }
 init();
