@@ -106,7 +106,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}
 #resultWrap{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;max-height:100vh;}
-.result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(12px,2.5vh,28px);text-align:center;}
+.result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(32px,6vh,64px);text-align:center;}
 .result-list{display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);width:100%;max-width:820px;}
 .result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);}
 .result-item.show{opacity:1;transform:none;}.result-item.gold.show{transform:scale(1.10);}
@@ -224,6 +224,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
   <div id="resultWrap">
     <div class="result-title">🏆 結果発表 🏆</div>
     <div class="result-list" id="resultList"></div>
+    <div id="voterCountDisplay" style="font-family:var(--wide);font-weight:500;font-size:clamp(18px,3.2vw,30px);color:var(--muted);margin-bottom:12px;text-align:center;"></div>
     <button class="close-btn" onclick="closeResult()">閉じる</button>
   </div>
 </div>
@@ -253,7 +254,7 @@ const db=firebase.database();
 
 const LABELS=['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
 const CONFETTI=['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
-const MEDALS=['🥇','🥈','🥉','4'];
+const MEDALS=['👑','🥈','🥉','🎖️'];
 const CHART_H=252;
 const REVEAL_AT_SEC=3.1;
 
@@ -464,23 +465,66 @@ function showRanking(all){
   }).sort((a,b)=>b.total-a.total);
   const medalClass=['gold','silver','bronze',''];
   const medalColor=['var(--accent)','#c0c0d0','#cd7f32','var(--muted)'];
-  document.getElementById('resultList').innerHTML=ranked.map((t,i)=>`
-    <div class="result-item ${medalClass[i]}" id="ri${i}" ${i===0?'style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);"':''}>
-      <div class="r-rank" style="color:${medalColor[i]};${i===0?'font-size:clamp(72px,12vw,130px);':''}">${MEDALS[i]}</div>
+  const totalVoters=ranked[0]?ranked[0].count:0;
+  const voterEl=document.getElementById('voterCountDisplay');
+  if(voterEl) voterEl.textContent=`投票者数 ${totalVoters} 名`;
+  // 1位
+  const first = ranked[0];
+  // 2〜4位
+  const rest = ranked.slice(1);
+
+  const firstHTML = first ? `
+    <div class="result-item gold" id="ri0" style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);">
+      <div class="r-rank" style="color:${medalColor[0]};font-size:clamp(72px,12vw,130px);">${MEDALS[0]}</div>
       <div class="r-info">
-        <span class="r-entry" ${i===0?'style="font-size:clamp(16px,2.2vw,24px);"':''}">ENTRY NO.${t.idx+1}</span>
-        <div class="r-name" ${i===0?'style="font-size:clamp(30px,6vw,60px);font-weight:500;"':''}>${t.name}</div>
-        <div class="r-pres" ${i===0?'style="font-size:clamp(18px,2.5vw,28px);"':''}>${t.presenter}</div>
+        <span class="r-entry" style="font-size:clamp(16px,2.2vw,24px);">ENTRY NO.${first.idx+1}</span>
+        <div class="r-name" style="font-size:clamp(30px,6vw,60px);font-weight:500;">${first.name}</div>
+        <div class="r-pres" style="font-size:clamp(18px,2.5vw,28px);">${first.presenter}</div>
       </div>
       <div class="r-score-wrap">
-        <div class="r-score" style="${i===0?'font-size:clamp(80px,14vw,140px);':''}color:var(--accent);">${t.total}</div>
-        <div class="r-score-label" ${i===0?'style="font-size:clamp(15px,1.8vw,20px);"':''}>合計点（${t.count}票）</div>
+        <div class="r-score" style="font-size:clamp(80px,14vw,140px);color:var(--accent);">
+          ${first.total}<span style="font-size:clamp(48px,7vw,84px);color:var(--accent);font-family:var(--wide);font-weight:500;">点</span>
+        </div>
       </div>
-    </div>
-  `).join('');
-  ranked.forEach((_,i)=>{
-    setTimeout(()=>{const el=document.getElementById('ri'+i);if(el)el.classList.add('show');},400+i*500);
-  });
+    </div>` : '';
+
+  const restHTML = rest.length ? `
+    <div id="restRow" style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;">
+      ${rest.map((t,j)=>{
+        const i=j+1;
+        return `<div class="result-item ${medalClass[i]}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
+          <div class="r-rank" style="color:${medalColor[i]};font-size:clamp(28px,4vw,52px);">${MEDALS[i]}</div>
+          <div class="r-info" style="flex:unset;text-align:center;">
+            <span class="r-entry" style="font-size:clamp(11px,1.3vw,16px);">ENTRY NO.${t.idx+1}</span>
+            <div class="r-name" style="font-size:clamp(14px,2vw,22px);">${t.name}</div>
+            <div class="r-pres" style="font-size:clamp(11px,1.3vw,16px);">${t.presenter}</div>
+          </div>
+          <div class="r-score" style="font-size:clamp(32px,5vw,60px);color:var(--accent);">
+            ${t.total}<span style="font-size:clamp(18px,3vw,36px);color:var(--accent);font-family:var(--wide);font-weight:500;">点</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+  document.getElementById('resultList').innerHTML=firstHTML+restHTML;
+  // 1位のアニメーション
+  setTimeout(()=>{
+    const el=document.getElementById('ri0');
+    if(el){el.classList.add('show');el.style.marginBottom='clamp(20px,4vh,48px)';}
+  },400);
+  // 2〜4位をまとめて表示
+  setTimeout(()=>{
+    const restRow=document.getElementById('restRow');
+    if(restRow){
+      restRow.style.opacity='0';restRow.style.transform='translateY(20px)';
+      restRow.style.transition='all .65s cubic-bezier(.4,0,.2,1)';
+      setTimeout(()=>{restRow.style.opacity='1';restRow.style.transform='none';},50);
+    }
+    [1,2,3].forEach(i=>{
+      const el=document.getElementById('ri'+i);
+      if(el) el.classList.add('show');
+    });
+  },1000);
 }
 
 function closeResult(){
@@ -488,6 +532,8 @@ function closeResult(){
   const bgm=document.getElementById('_bgmEl');
   bgm.pause();bgm.currentTime=0;
   bgmStarted=false;
+  if(_confettiTimer){clearInterval(_confettiTimer);_confettiTimer=null;}
+  document.querySelectorAll('.cp').forEach(e=>e.remove());
 }
 
 async function resetAll(){
@@ -497,17 +543,23 @@ async function resetAll(){
   location.href=location.pathname;
 }
 
-function launchConfetti(){
-  for(let i=0;i<120;i++) setTimeout(()=>{
+function spawnConfettiBatch(){
+  for(let i=0;i<40;i++) setTimeout(()=>{
     const e=document.createElement('div');e.className='cp';
     e.style.left=Math.random()*100+'vw';
     e.style.background=CONFETTI[Math.floor(Math.random()*CONFETTI.length)];
     const sz=(7+Math.random()*12)+'px';
     e.style.width=sz;e.style.height=sz;
     e.style.animationDuration=(2+Math.random()*2.5)+'s';
-    e.style.animationDelay=(Math.random()*.8)+'s';
-    document.body.appendChild(e);setTimeout(()=>e.remove(),5000);
-  },Math.random()*600);
+    e.style.animationDelay=(Math.random()*.5)+'s';
+    document.body.appendChild(e);setTimeout(()=>e.remove(),4000);
+  },Math.random()*400);
+}
+let _confettiTimer=null;
+function launchConfetti(){
+  spawnConfettiBatch();
+  if(_confettiTimer) clearInterval(_confettiTimer);
+  _confettiTimer=setInterval(spawnConfettiBatch,2000);
 }
 
 async function init(){
