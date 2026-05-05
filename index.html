@@ -108,8 +108,8 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(12px,2.5vh,28px);text-align:center;}
 .result-list{display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);width:100%;max-width:820px;}
 .result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);}
-.result-item.show{opacity:1;transform:none;}.result-item.gold.show{transform:scale(1.06);}
-.result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.07);transform:scale(1.06);transform-origin:center;box-shadow:0 0 32px rgba(240,192,64,0.25);}
+.result-item.show{opacity:1;transform:none;}.result-item.gold.show{transform:scale(1.10);}
+.result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.07);transform:scale(1.10);transform-origin:center;box-shadow:0 0 32px rgba(240,192,64,0.25);}
 .result-item.silver{border-color:rgba(192,192,210,0.5);}
 .result-item.bronze{border-color:rgba(200,130,60,0.5);}
 .r-rank{font-family:var(--wide);font-weight:500;font-size:clamp(40px,6vw,68px);min-width:clamp(48px,6vw,76px);text-align:center;line-height:1;}
@@ -465,16 +465,16 @@ function showRanking(all){
   const medalClass=['gold','silver','bronze',''];
   const medalColor=['var(--accent)','#c0c0d0','#cd7f32','var(--muted)'];
   document.getElementById('resultList').innerHTML=ranked.map((t,i)=>`
-    <div class="result-item ${medalClass[i]}" id="ri${i}" ${i===0?'style="padding:clamp(18px,3vh,32px) clamp(20px,4vw,36px);"':''}>
-      <div class="r-rank" style="color:${medalColor[i]};${i===0?'font-size:clamp(56px,9vw,96px);':''}">${MEDALS[i]}</div>
+    <div class="result-item ${medalClass[i]}" id="ri${i}" ${i===0?'style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);"':''}>
+      <div class="r-rank" style="color:${medalColor[i]};${i===0?'font-size:clamp(72px,12vw,130px);':''}">${MEDALS[i]}</div>
       <div class="r-info">
         <span class="r-entry" ${i===0?'style="font-size:clamp(16px,2.2vw,24px);"':''}">ENTRY NO.${t.idx+1}</span>
-        <div class="r-name" ${i===0?'style="font-size:clamp(24px,4.5vw,44px);font-weight:500;"':''}>${t.name}</div>
-        <div class="r-pres" ${i===0?'style="font-size:clamp(15px,2vw,22px);"':''}>${t.presenter}</div>
+        <div class="r-name" ${i===0?'style="font-size:clamp(30px,6vw,60px);font-weight:500;"':''}>${t.name}</div>
+        <div class="r-pres" ${i===0?'style="font-size:clamp(18px,2.5vw,28px);"':''}>${t.presenter}</div>
       </div>
       <div class="r-score-wrap">
-        <div class="r-score" style="${i===0?'font-size:clamp(64px,11vw,110px);':''}color:var(--accent);">${t.total}</div>
-        <div class="r-score-label" ${i===0?'style="font-size:clamp(13px,1.5vw,17px);"':''}>合計点（${t.count}票）</div>
+        <div class="r-score" style="${i===0?'font-size:clamp(80px,14vw,140px);':''}color:var(--accent);">${t.total}</div>
+        <div class="r-score-label" ${i===0?'style="font-size:clamp(15px,1.8vw,20px);"':''}>合計点（${t.count}票）</div>
       </div>
     </div>
   `).join('');
