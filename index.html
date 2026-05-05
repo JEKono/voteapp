@@ -230,7 +230,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 </div>
 
 <!-- 投票ライブBGM -->
-<audio id="_liveBgmEl" preload="none" loop style="display:none">
+<audio id="_liveBgmEl" preload="auto" loop style="display:none">
   <source src="Raw_Essay.mp3" type="audio/mp3">
 </audio>
 <!-- ドラムロール音：DOMに固定して絶対に止まらないようにする -->
@@ -316,10 +316,23 @@ function goAdmin(){
 function playLiveBGM(){
   try{
     const bgm=document.getElementById('_liveBgmEl');
-    if(bgm){
-      bgm.volume=0.4;
-      bgm.loop=true;
-      bgm.play().catch(()=>{});
+    if(!bgm) return;
+    bgm.volume=0.4;
+    bgm.loop=true;
+    // すでに再生中なら何もしない
+    if(!bgm.paused) return;
+    const p=bgm.play();
+    if(p!==undefined){
+      p.catch(()=>{
+        // Autoplay失敗時は次のユーザー操作で再試行
+        const retry=()=>{
+          bgm.play().catch(()=>{});
+          document.removeEventListener('click', retry);
+          document.removeEventListener('keydown', retry);
+        };
+        document.addEventListener('click', retry, {once:true});
+        document.addEventListener('keydown', retry, {once:true});
+      });
     }
   }catch(e){}
 }
@@ -607,11 +620,8 @@ async function init(){
       if(tn)tn.value=t.name;if(tp)tp.value=t.presenter;
     });
     goAdmin();
-    // 既存セッション復元時：画面クリックでBGM開始
-    document.addEventListener('click', function startOnClick(){
-      playLiveBGM();
-      document.removeEventListener('click', startOnClick);
-    }, {once:true});
+    // 既存セッション復元時：即座に試みて失敗したらクリック待ち
+    playLiveBGM();
   }else{show('setupPage');}
 }
 init();
