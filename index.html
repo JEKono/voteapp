@@ -43,7 +43,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .btn-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:10px;}
 #adminPage{background:var(--bg);}
 .admin-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.admin-title{font-family:var(--wide);font-weight:500;font-size:30px;letter-spacing:3px;color:var(--accent);text-align:center;}
+.admin-title{font-family:var(--wide);font-weight:500;font-size:45px;letter-spacing:3px;color:var(--accent);text-align:center;}
 .admin-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
 .badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:15px;color:var(--muted);}
 .badge.open{color:#4ec97a;border-color:rgba(78,201,122,0.3);}
@@ -53,18 +53,19 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .chart-col-wrap{flex:7;min-width:0;display:flex;flex-direction:column;}
 .qr-box{background:#ffffff;border-radius:0;padding:24px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;flex:1;}
 .qr-box-label{font-family:'Noto Sans JP',sans-serif;font-weight:400;font-size:32px;color:#111;text-align:center;line-height:1.7;}
-.qr-box-url{font-size:32px;color:#333;word-break:break-all;text-align:center;line-height:1.8;}
+.qr-box-url{font-size:26px;color:#333;word-break:break-all;text-align:center;line-height:1.8;}
 .vote-count-display{text-align:center;padding:6px 0 10px;display:flex;flex-direction:column-reverse;align-items:center;gap:4px;}
 .vcd-num{font-family:var(--wide);font-weight:500;font-size:160px;color:var(--accent);line-height:1;}
-.vcd-label{font-size:18px;color:var(--muted);margin-top:4px;}
+.vcd-label{font-size:36px;color:var(--muted);margin-top:4px;}
 .bar-chart{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 12px 12px;}
 .chart-area{display:flex;align-items:flex-end;gap:10px;}
 .chart-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
-.bar-container{width:60%;height:360px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--surface2);border-radius:4px 4px 0 0;overflow:hidden;}
+.bar-container{width:60%;height:252px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--surface2);border-radius:4px 4px 0 0;overflow:hidden;}
 .stack-seg{width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:height .55s cubic-bezier(.4,0,.2,1);}
 .seg-cnt{font-family:var(--wide);font-weight:400;font-size:12px;color:rgba(0,0,0,0.75);line-height:1;}
 .sc1{background:var(--s1);}.sc2{background:var(--s2);}.sc3{background:var(--s3);}.sc4{background:var(--s4);}.sc5{background:var(--s5);}
-.chart-score-num{font-family:var(--wide);font-weight:500;font-size:24px;color:var(--text);line-height:1;}
+.chart-score-num{font-family:var(--wide);font-weight:500;font-size:72px;color:var(--text);line-height:1;display:flex;align-items:baseline;gap:4px;}
+.chart-score-unit{font-family:var(--wide);font-weight:500;font-size:43px;color:var(--muted);}
 .chart-baseline{height:1px;background:var(--border);margin:5px 0 8px;}
 .chart-entry-label{font-family:var(--wide);font-weight:400;font-size:14px;color:var(--muted);letter-spacing:1px;filter:blur(6px);user-select:none;}
 .chart-name-label{font-size:14px;color:var(--text);text-align:center;line-height:1.4;filter:blur(6px);user-select:none;}
@@ -253,7 +254,7 @@ const db=firebase.database();
 const LABELS=['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
 const CONFETTI=['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
 const MEDALS=['🥇','🥈','🥉','4'];
-const CHART_H=360;
+const CHART_H=252;
 const REVEAL_AT_SEC=3.1;
 
 // ドラムロール音をbase64でセット
@@ -308,7 +309,7 @@ function goAdmin(){
 function buildChart(){
   document.getElementById('chartArea').innerHTML=teams.map((t,i)=>`
     <div class="chart-item">
-      <div class="chart-score-num" id="cscore${i}">0</div>
+      <div class="chart-score-num" id="cscore${i}"><span id="cscoreVal${i}">0</span><span class="chart-score-unit">点</span></div>
       <div class="bar-container" id="bcon${i}"></div>
       <div class="chart-entry-label">NO.${i+1}</div>
       <div class="chart-name-label">${t.name}</div>
@@ -345,7 +346,7 @@ function updateChart(data){
   const maxTotal=Math.max(...stats.map(s=>s.total),1);
   const pxPerPt=CHART_H/maxTotal;
   stats.forEach((st,i)=>{
-    document.getElementById('cscore'+i).textContent=st.total;
+    document.getElementById('cscoreVal'+i).textContent=st.total;
     const con=document.getElementById('bcon'+i);
     if(!document.getElementById(`seg${i}_1`)){
       for(let sc=5;sc>=1;sc--){
