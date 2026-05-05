@@ -113,7 +113,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.07);transform:scale(1.10);transform-origin:center;box-shadow:0 0 32px rgba(240,192,64,0.25);}
 .result-item.silver{border-color:rgba(192,192,210,0.5);}
 .result-item.bronze{border-color:rgba(200,130,60,0.5);}
-.r-rank{font-family:var(--wide);font-weight:500;font-size:clamp(40px,6vw,68px);min-width:clamp(80px,10vw,140px);text-align:center;line-height:1;padding-right:16px;}
+.r-rank{font-family:var(--wide);font-weight:500;font-size:clamp(40px,6vw,68px);min-width:clamp(120px,14vw,200px);text-align:center;line-height:1;padding-right:32px;border-right:2px solid var(--border);margin-right:16px;}
 .r-entry{font-family:var(--wide);font-weight:400;font-size:clamp(14px,1.8vw,20px);color:var(--muted);display:block;letter-spacing:1px;}
 .r-name{font-size:clamp(18px,3.2vw,30px);font-weight:400;line-height:1.3;}
 .r-pres{font-size:clamp(13px,1.6vw,17px);color:var(--muted);margin-top:3px;}
@@ -475,7 +475,7 @@ function showRanking(all){
 
   const firstHTML = first ? `
     <div class="result-item gold" id="ri0" style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);">
-      <div class="r-rank" style="color:${medalColor[0]};font-size:clamp(40px,6vw,72px);font-family:var(--wide);font-weight:500;">${MEDALS[0]}</div>
+      <div class="r-rank" style="color:${medalColor[0]};font-size:clamp(56px,9vw,96px);font-family:var(--wide);font-weight:500;">${MEDALS[0]}</div>
       <div class="r-info">
         <span class="r-entry" style="font-size:clamp(16px,2.2vw,24px);">ENTRY NO.${first.idx+1}</span>
         <div class="r-name" style="font-size:clamp(30px,6vw,60px);font-weight:500;">${first.name}</div>
