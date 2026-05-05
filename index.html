@@ -367,6 +367,18 @@ function updateChart(data){
     }
     con.style.filter=st.total===maxTotal&&st.total>0?'brightness(1.15)':'none';
   });
+
+  // 合計点の高い順にchartAreaの列を並び替え
+  const chartArea=document.getElementById('chartArea');
+  if(chartArea){
+    const cols=Array.from(chartArea.children);
+    cols.sort((a,b)=>{
+      const ai=parseInt(a.querySelector('[id^="cscore"]').id.replace('cscore',''));
+      const bi=parseInt(b.querySelector('[id^="cscore"]').id.replace('cscore',''));
+      return stats[bi].total - stats[ai].total;
+    });
+    cols.forEach(col=>chartArea.appendChild(col));
+  }
 }
 
 async function endVoting(){
