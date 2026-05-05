@@ -229,6 +229,10 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
   </div>
 </div>
 
+<!-- 投票ライブBGM -->
+<audio id="_liveBgmEl" preload="none" loop style="display:none">
+  <source src="Paper_Smoke.mp3" type="audio/mp3">
+</audio>
 <!-- ドラムロール音：DOMに固定して絶対に止まらないようにする -->
 <audio id="_drumEl" preload="auto" style="display:none"></audio>
 <!-- BGM -->
@@ -305,6 +309,19 @@ function goAdmin(){
   voteUrl=location.origin+location.pathname+'?vote=1';
   genQRInline();
   listenVotes();
+  // 投票ライブBGMを再生
+  playLiveBGM();
+}
+
+function playLiveBGM(){
+  try{
+    const bgm=document.getElementById('_liveBgmEl');
+    if(bgm){
+      bgm.volume=0.4;
+      bgm.loop=true;
+      bgm.play().catch(()=>{});
+    }
+  }catch(e){}
 }
 
 function buildChart(){
@@ -457,6 +474,9 @@ async function revealResults(){
       bgm.play().catch(()=>{});
     }
   };
+  // ライブBGMを停止
+  const liveBgm=document.getElementById('_liveBgmEl');
+  if(liveBgm){liveBgm.pause();liveBgm.currentTime=0;}
 
   // REVEAL_AT_SEC秒後に結果表示（音には触れない）
   drumEl.currentTime=0;
