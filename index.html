@@ -493,7 +493,7 @@ function showRanking(all){
       ${rest.map((t,j)=>{
         const i=j+1;
         return `<div class="result-item ${medalClass[i]}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
-          <div class="r-rank" style="color:${medalColor[i]};font-size:clamp(28px,4vw,52px);" style="font-family:var(--wide);font-weight:500;text-align:center;width:100%;display:block;margin-bottom:8px;">${MEDALS[i]}</div>
+          <div style="font-family:var(--wide);font-weight:500;font-size:clamp(28px,4vw,52px);color:${medalColor[i]};text-align:center;width:100%;display:block;margin-bottom:8px;">${MEDALS[i]}</div>
           <div class="r-info" style="flex:unset;text-align:center;">
             <span class="r-entry" style="font-size:clamp(11px,1.3vw,16px);">ENTRY NO.${t.idx+1}</span>
             <div class="r-name" style="font-size:clamp(14px,2vw,22px);">${t.name}</div>
