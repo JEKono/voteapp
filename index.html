@@ -331,10 +331,28 @@ async function startSession(){
     name:document.getElementById('tn'+i).value||`企画${i+1}`,
     presenter:document.getElementById('tp'+i).value||`発表者${i+1}`
   });
-  await db.ref('session').set({teams,active:true,closed:false,createdAt:Date.now()});
+
+  // 抽選順をteamsの並びに変換
+  // cardOrders[cardVal] = entryIdx（0-3）
+  // cardVal+1 = プレゼン順番
+  // → presentOrder[entryIdx] = プレゼン順番
+  const presentOrder = [null,null,null,null];
+  cardOrders.forEach((entryIdx, cardVal)=>{
+    if(entryIdx !== null) presentOrder[entryIdx] = cardVal + 1;
+  });
+  // 抽選済みの場合、teamsをプレゼン順に並び替え
+  let orderedTeams = [...teams];
+  if(presentOrder.some(o=>o!==null)){
+    orderedTeams = [null,null,null,null];
+    presentOrder.forEach((order, entryIdx)=>{
+      if(order !== null) orderedTeams[order-1] = teams[entryIdx];
+    });
+    orderedTeams = orderedTeams.filter(t=>t!==null);
+  }
+
+  await db.ref('session').set({teams:orderedTeams,active:true,closed:false,createdAt:Date.now()});
   await db.ref('votes').remove();
   goAdmin();
-  // ユーザー操作直後なのでAutoplay制限なしに再生可能
   playLiveBGM();
 }
 
@@ -375,7 +393,7 @@ function buildChart(){
     <div class="chart-item">
       <div class="chart-score-num" id="cscore${i}"><span id="cscoreVal${i}">0</span><span class="chart-score-unit">点</span></div>
       <div class="bar-container" id="bcon${i}"></div>
-      <div class="chart-entry-label">NO.${i+1}</div>
+      <div class="chart-entry-label">#${i+1}</div>
       <div class="chart-name-label">${t.name}</div>
     </div>
   `).join('');
@@ -461,7 +479,7 @@ async function goVote(){
   selScores=[0,0,0,0];
   document.getElementById('voteCards').innerHTML=teams.map((t,i)=>`
     <div class="vote-card vc${i}">
-      <div class="vc-entry">ENTRY NO.${i+1}</div>
+      <div class="vc-entry">ENTRY #${i+1}</div>
       <div class="vc-title">${t.name}</div>
       <div class="vc-pres">👤 ${t.presenter}</div>
       <div class="rating-row">
@@ -555,7 +573,7 @@ function showRanking(all){
     <div class="result-item gold" id="ri0" style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);">
       <div class="r-rank" style="color:${medalColor[0]};font-size:clamp(56px,9vw,96px);font-family:var(--wide);font-weight:500;">${MEDALS[0]}</div>
       <div class="r-info">
-        <span class="r-entry" style="font-size:clamp(16px,2.2vw,24px);">ENTRY NO.${first.idx+1}</span>
+        <span class="r-entry" style="font-size:clamp(16px,2.2vw,24px);">ENTRY #${first.idx+1}</span>
         <div class="r-name" style="font-size:clamp(30px,6vw,60px);font-weight:500;">${first.name}</div>
         <div class="r-pres" style="font-size:clamp(18px,2.5vw,28px);">${first.presenter}</div>
       </div>
@@ -573,7 +591,7 @@ function showRanking(all){
         return `<div class="result-item ${medalClass[i]}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
           <div style="font-family:var(--wide);font-weight:500;font-size:clamp(28px,4vw,52px);color:${medalColor[i]};text-align:center;width:100%;display:block;margin-bottom:8px;">${MEDALS[i]}</div>
           <div class="r-info" style="flex:unset;text-align:center;">
-            <span class="r-entry" style="font-size:clamp(11px,1.3vw,16px);">ENTRY NO.${t.idx+1}</span>
+            <span class="r-entry" style="font-size:clamp(11px,1.3vw,16px);">ENTRY #${t.idx+1}</span>
             <div class="r-name" style="font-size:clamp(14px,2vw,22px);">${t.name}</div>
             <div class="r-pres" style="font-size:clamp(11px,1.3vw,16px);">${t.presenter}</div>
           </div>
