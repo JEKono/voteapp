@@ -754,9 +754,9 @@ function playFanfare(){
 }
 
 async function init(){
+  const isVotePage = new URLSearchParams(location.search).get('vote')==='1';
   buildSetup();
-  const params=new URLSearchParams(location.search);
-  if(params.get('vote')==='1'){await goVote();return;}
+  if(isVotePage){await goVote();return;}
   const snap=await db.ref('session').once('value');
   const sess=snap.val();
   if(sess&&sess.active){
@@ -770,17 +770,12 @@ async function init(){
     playLiveBGM();
   }else{
     show('setupPage');
-    playFanfare();
+    // setupPageへの遷移時のみファンファーレ再生（投票画面ではない）
+    if(!isVotePage) playFanfare();
   }
 }
 init();
-// 初期表示がsetupPageの場合（Firebaseより先にユーザーが操作できる）
-window.addEventListener('load',()=>{
-  // setupPageがactiveなら再生
-  if(document.getElementById('setupPage').classList.contains('active')){
-    setTimeout(playFanfare, 500);
-  }
-});
+
 </script>
 </body>
 </html>
