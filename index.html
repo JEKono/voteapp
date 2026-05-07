@@ -28,14 +28,14 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .setup-team{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:7px;position:relative;overflow:hidden;}
 .setup-team::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
 .s0::before{background:var(--c1);}.s1::before{background:var(--c2);}.s2::before{background:var(--c3);}.s3::before{background:var(--c4);}
-.setup-num{font-family:var(--wide);font-weight:500;font-size:18px;letter-spacing:1px;}
+.setup-num{font-family:var(--wide);font-weight:500;font-size:36px;letter-spacing:1px;}
 .s0 .setup-num{color:var(--c1);}.s1 .setup-num{color:var(--c2);}.s2 .setup-num{color:var(--c3);}.s3 .setup-num{color:var(--c4);}
-.setup-label{font-size:13px;color:var(--muted);margin-top:2px;}
-.setup-input{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:400;}
+.setup-label{font-size:26px;color:var(--muted);margin-top:2px;}
+.setup-input{width:100%;padding:16px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:28px;font-weight:400;}
 .setup-input:focus{outline:none;border-color:var(--accent);}
 .btn{padding:14px 44px;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:400;cursor:pointer;transition:all .2s;text-align:center;}
 .btn:hover{background:rgba(255,255,255,0.08);}
-.btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-size:17px;padding:16px 56px;}
+.btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-size:34px;padding:20px 64px;}
 .btn.primary:hover{background:#ffd060;}
 .btn.danger{border-color:rgba(224,90,90,0.4);color:var(--accent2);}
 .btn.end-vote{background:rgba(224,90,90,0.15);border-color:rgba(224,90,90,0.5);color:#ff8080;}
@@ -128,17 +128,17 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 </head>
 <body>
 
-<div class="page active" id="loadingPage">
+<div class="page" id="loadingPage">
   <div style="text-align:center;">
     <div class="spinner"></div>
     <p style="font-size:18px;color:var(--muted);">接続中...</p>
   </div>
 </div>
 
-<div class="page" id="setupPage">
+<div class="page active" id="setupPage">
   <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
-    <h1 style="font-family:var(--wide);font-weight:500;font-size:40px;letter-spacing:4px;color:var(--accent);text-align:center;">VOTE SETUP</h1>
-    <p class="sub">4チームの企画名とプレゼンター名を入力してください</p>
+    <h1 style="font-family:var(--wide);font-weight:500;font-size:80px;letter-spacing:4px;color:var(--accent);text-align:center;">プレゼン順抽選</h1>
+    
     <div class="setup-grid" id="setupTeams"></div>
     <div style="display:flex;justify-content:center;margin-top:4px;">
       <button class="btn primary" onclick="startSession()">投票セッションを開始 →</button>
@@ -276,10 +276,10 @@ function show(id){
 
 function buildSetup(){
   const defs=[
-    {name:'AIスマートオフィス',presenter:'田中 / 佐藤'},
-    {name:'グリーンデリバリー', presenter:'山田 / 鈴木'},
-    {name:'ヘルスケアAI',      presenter:'伊藤 / 渡辺'},
-    {name:'SNSコマース',       presenter:'中村 / 小林'},
+    {name:'みまもり助太郎',   presenter:'結城里紗'},
+    {name:'FireDepartment',   presenter:'吉岡那奈恵'},
+    {name:'FoodKeeper',       presenter:'松尾広明＆岸原潤'},
+    {name:'FamGrow',          presenter:'西澤友里枝(チームMD)'},
   ];
   document.getElementById('setupTeams').innerHTML=defs.map((d,i)=>`
     <div class="setup-team s${i}">
