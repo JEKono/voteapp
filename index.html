@@ -33,6 +33,9 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .setup-label{font-size:31px;color:var(--muted);margin-top:20px;}
 .setup-input{width:100%;padding:16px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:34px;font-weight:400;}
 .setup-input:focus{outline:none;border-color:var(--accent);}
+.lottery-btn{margin-top:16px;padding:14px 20px;border-radius:50px;border:1px solid var(--accent);background:rgba(240,192,64,0.1);color:var(--accent);font-family:'Noto Sans JP',sans-serif;font-size:22px;cursor:pointer;transition:all .2s;width:100%;}
+.lottery-btn:hover{background:rgba(240,192,64,0.25);}
+.lottery-btn:disabled{border-color:var(--muted);color:var(--muted);background:var(--surface2);cursor:not-allowed;}
 .btn{padding:14px 44px;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:400;cursor:pointer;transition:all .2s;text-align:center;}
 .btn:hover{background:rgba(255,255,255,0.08);}
 .btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-size:17px;padding:16px 56px;}
@@ -124,6 +127,24 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .close-btn{margin-top:clamp(12px,2vh,20px);padding:12px 40px;border-radius:50px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:400;cursor:pointer;}
 .cp{position:fixed;top:-20px;animation:fall linear forwards;z-index:200;border-radius:2px;}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+/* カードダイアログ */
+#cardDialog{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
+#cardDialog.active{display:flex;}
+.card-dialog-title{font-family:var(--wide);font-weight:500;font-size:clamp(24px,4vw,40px);color:var(--accent);letter-spacing:2px;text-align:center;}
+.card-dialog-sub{font-size:clamp(14px,2vw,20px);color:var(--muted);text-align:center;}
+.cards-row{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.card{width:120px;height:180px;border-radius:12px;cursor:pointer;position:relative;transition:transform .4s;transform-style:preserve-3d;}
+.card.flipped{transform:rotateY(180deg);}
+.card.used{cursor:not-allowed;}
+.card-face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:700;}
+.card-back{background:linear-gradient(135deg,#1a3a6b,#2a5298);border:3px solid #4a72b8;color:transparent;font-size:48px;}
+.card-back::after{content:'🂠';color:#4a72b8;font-size:72px;}
+.card-front{background:#fff;border:3px solid #ddd;transform:rotateY(180deg);flex-direction:column;gap:4px;}
+.card-front.heart{color:#e05a5a;}
+.card-suit{font-size:28px;line-height:1;}
+.card-num{font-size:52px;font-weight:900;line-height:1;font-family:var(--wide);}
+.card-dialog-close{padding:12px 40px;border-radius:50px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:18px;cursor:pointer;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -233,6 +254,13 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 <audio id="_liveBgmEl" preload="auto" loop style="display:none">
   <source src="Raw_Essay.mp3" type="audio/mp3">
 </audio>
+<!-- カードダイアログ -->
+<div id="cardDialog">
+  <div class="card-dialog-title" id="cardDialogTitle">カードを1枚選んでください</div>
+  <div class="card-dialog-sub" id="cardDialogSub">あなたのプレゼン順番が決まります</div>
+  <div class="cards-row" id="cardsRow"></div>
+  <button class="card-dialog-close" onclick="closeCardDialog()">閉じる</button>
+</div>
 <!-- ドラムロール音：DOMに固定して絶対に止まらないようにする -->
 <audio id="_drumEl" preload="auto" style="display:none"></audio>
 <!-- BGM -->
@@ -283,11 +311,12 @@ function buildSetup(){
   ];
   document.getElementById('setupTeams').innerHTML=defs.map((d,i)=>`
     <div class="setup-team s${i}">
-      <div class="setup-num">ENTRY #${i+1}</div>
+      <div class="setup-num">ENTRY <span class="entry-order" id="order${i}" style="visibility:hidden;">#<span id="orderNum${i}">?</span></span></div>
       <span class="setup-label">企画名</span>
       <input class="setup-input" id="tn${i}" value="${d.name}">
       <span class="setup-label">プレゼンター</span>
       <input class="setup-input" id="tp${i}" value="${d.presenter}">
+      <button class="lottery-btn" onclick="openLottery(${i})">🎴 抽選</button>
     </div>
   `).join('');
 }
@@ -605,6 +634,73 @@ function launchConfetti(){
   spawnConfettiBatch();
   if(_confettiTimer) clearInterval(_confettiTimer);
   _confettiTimer=setInterval(spawnConfettiBatch,2000);
+}
+
+// 抽選ロジック
+const CARD_LABELS = ['A','2','3','4'];
+const CARD_SUITS = ['♥','♥','♥','♥'];
+let cardOrders = [null,null,null,null]; // 各カード(0-3)に割り当てられた順番
+let currentLotteryEntry = null; // 現在抽選中のエントリー番号
+
+function openLottery(entryIdx){
+  currentLotteryEntry = entryIdx;
+  const name = document.getElementById('tn'+entryIdx).value || `企画${entryIdx+1}`;
+  document.getElementById('cardDialogTitle').textContent = name + ' の抽選';
+  document.getElementById('cardDialogSub').textContent = 'カードを1枚タップしてください';
+  renderCards();
+  document.getElementById('cardDialog').classList.add('active');
+}
+
+function renderCards(){
+  const row = document.getElementById('cardsRow');
+  row.innerHTML = CARD_LABELS.map((label,i)=>{
+    const assigned = cardOrders[i]; // このカードに割り当て済みのエントリー番号
+    const isOpen = assigned !== null;
+    const isUsed = isOpen; // 開いたカードはタップ不可
+    return `
+      <div class="card${isOpen?' flipped':''}${isUsed?' used':''}" id="card${i}" onclick="pickCard(${i})">
+        <div class="card-face card-back"></div>
+        <div class="card-face card-front heart">
+          <div class="card-suit">♥</div>
+          <div class="card-num">${label}</div>
+          <div class="card-suit">♥</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function pickCard(cardIdx){
+  if(cardOrders[cardIdx] !== null) return; // 既に開かれている
+  if(currentLotteryEntry === null) return;
+
+  // このカードをcurrentLotteryEntryに割り当て
+  cardOrders[cardIdx] = currentLotteryEntry;
+  const order = cardIdx + 1; // A=1, 2=2, 3=3, 4=4
+
+  // カードをめくるアニメーション
+  const card = document.getElementById('card'+cardIdx);
+  card.classList.add('flipped');
+  card.classList.add('used');
+
+  // エントリーに順番を表示
+  document.getElementById('orderNum'+currentLotteryEntry).textContent = order;
+  document.getElementById('order'+currentLotteryEntry).style.visibility = 'visible';
+
+  // 抽選ボタンを無効化
+  const btns = document.querySelectorAll('.lottery-btn');
+  if(btns[currentLotteryEntry]) btns[currentLotteryEntry].disabled = true;
+
+  // ダイアログのサブタイトルを更新
+  document.getElementById('cardDialogSub').textContent =
+    `${order}番目のプレゼンに決定！`;
+
+  currentLotteryEntry = null;
+}
+
+function closeCardDialog(){
+  document.getElementById('cardDialog').classList.remove('active');
+  currentLotteryEntry = null;
 }
 
 async function init(){
