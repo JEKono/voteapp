@@ -250,6 +250,10 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
   </div>
 </div>
 
+<!-- プレゼン順抽選ファンファーレ -->
+<audio id="_fanfareEl" preload="auto" style="display:none">
+  <source src="gaisen_fanfare.mp3" type="audio/mp3">
+</audio>
 <!-- 投票ライブBGM -->
 <audio id="_liveBgmEl" preload="auto" loop style="display:none">
   <source src="Raw_Essay.mp3" type="audio/mp3">
@@ -638,11 +642,24 @@ function launchConfetti(){
 
 // 抽選ロジック
 const CARD_LABELS = ['A','2','3','4'];
-const CARD_SUITS = ['♥','♥','♥','♥'];
-let cardOrders = [null,null,null,null]; // 各カード(0-3)に割り当てられた順番
-let currentLotteryEntry = null; // 現在抽選中のエントリー番号
+let cardOrders = [null,null,null,null]; // 各カード(0-3)に割り当てられた順番(表示インデックス→値)
+let cardShuffled = [0,1,2,3]; // 表示順（シャッフル済み）：表示位置→カード値インデックス
+let currentLotteryEntry = null;
+
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
 
 function openLottery(entryIdx){
+  // 最初の抽選時のみシャッフル
+  if(cardOrders.every(o=>o===null)){
+    cardShuffled = shuffleArray([0,1,2,3]);
+  }
   currentLotteryEntry = entryIdx;
   const name = document.getElementById('tn'+entryIdx).value || `企画${entryIdx+1}`;
   document.getElementById('cardDialogTitle').textContent = name + ' の抽選';
@@ -653,12 +670,13 @@ function openLottery(entryIdx){
 
 function renderCards(){
   const row = document.getElementById('cardsRow');
-  row.innerHTML = CARD_LABELS.map((label,i)=>{
-    const assigned = cardOrders[i]; // このカードに割り当て済みのエントリー番号
-    const isOpen = assigned !== null;
-    const isUsed = isOpen; // 開いたカードはタップ不可
+  // cardShuffledの順番で表示（シャッフル済み）
+  row.innerHTML = cardShuffled.map((cardVal, dispIdx)=>{
+    const label = CARD_LABELS[cardVal];
+    const order = cardVal + 1;
+    const isOpen = cardOrders[cardVal] !== null;
     return `
-      <div class="card${isOpen?' flipped':''}${isUsed?' used':''}" id="card${i}" onclick="pickCard(${i})">
+      <div class="card${isOpen?' flipped':''}${isOpen?' used':''}" id="card${dispIdx}" onclick="pickCard(${cardVal})">
         <div class="card-face card-back"></div>
         <div class="card-face card-front heart">
           <div class="card-suit">♥</div>
@@ -670,18 +688,17 @@ function renderCards(){
   }).join('');
 }
 
-function pickCard(cardIdx){
-  if(cardOrders[cardIdx] !== null) return; // 既に開かれている
+function pickCard(cardVal){
+  if(cardOrders[cardVal] !== null) return;
   if(currentLotteryEntry === null) return;
 
-  // このカードをcurrentLotteryEntryに割り当て
-  cardOrders[cardIdx] = currentLotteryEntry;
-  const order = cardIdx + 1; // A=1, 2=2, 3=3, 4=4
+  cardOrders[cardVal] = currentLotteryEntry;
+  const order = cardVal + 1; // A=1, 2=2, 3=3, 4=4
 
-  // カードをめくるアニメーション
-  const card = document.getElementById('card'+cardIdx);
-  card.classList.add('flipped');
-  card.classList.add('used');
+  // カードをめくるアニメーション（表示位置でDOM要素を特定）
+  const dispIdx = cardShuffled.indexOf(cardVal);
+  const card = document.getElementById('card'+dispIdx);
+  if(card){ card.classList.add('flipped'); card.classList.add('used'); }
 
   // エントリーに順番を表示
   document.getElementById('orderNum'+currentLotteryEntry).textContent = order;
@@ -703,6 +720,21 @@ function closeCardDialog(){
   currentLotteryEntry = null;
 }
 
+// セットアップ画面表示時にファンファーレ再生
+function playFanfare(){
+  const f=document.getElementById('_fanfareEl');
+  if(f){
+    f.currentTime=0;
+    f.play().catch(()=>{
+      // Autoplay失敗時はクリックで再生
+      document.addEventListener('click',function ff(){
+        f.play().catch(()=>{});
+        document.removeEventListener('click',ff);
+      },{once:true});
+    });
+  }
+}
+
 async function init(){
   buildSetup();
   const params=new URLSearchParams(location.search);
@@ -718,9 +750,19 @@ async function init(){
     goAdmin();
     // 既存セッション復元時：即座に試みて失敗したらクリック待ち
     playLiveBGM();
-  }else{show('setupPage');}
+  }else{
+    show('setupPage');
+    playFanfare();
+  }
 }
 init();
+// 初期表示がsetupPageの場合（Firebaseより先にユーザーが操作できる）
+window.addEventListener('load',()=>{
+  // setupPageがactiveなら再生
+  if(document.getElementById('setupPage').classList.contains('active')){
+    setTimeout(playFanfare, 500);
+  }
+});
 </script>
 </body>
 </html>
