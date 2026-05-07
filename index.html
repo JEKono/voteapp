@@ -546,7 +546,10 @@ async function revealResults(){
   drumEl.currentTime=0;
   drumEl.play().catch(()=>{});
 
-  setTimeout(()=>{
+  setTimeout(async()=>{
+    // Firebaseから最新のteams（並び替え済み）を取得
+    const sessSnap=await db.ref('session/teams').once('value');
+    if(sessSnap.val()) teams=sessSnap.val();
     document.getElementById('drumrollWrap').style.display='none';
     document.getElementById('resultWrap').style.display='flex';
     showRanking(all);
