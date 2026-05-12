@@ -354,6 +354,9 @@ async function startSession(){
 
   await db.ref('session').set({teams:orderedTeams,active:true,closed:false,createdAt:Date.now()});
   await db.ref('votes').remove();
+  // ファンファーレを停止
+  const fanfare=document.getElementById('_fanfareEl');
+  if(fanfare){fanfare.pause();fanfare.currentTime=0;}
   goAdmin();
   playLiveBGM();
 }
