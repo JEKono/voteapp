@@ -63,7 +63,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .bar-chart{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 12px 12px;}
 .chart-area{display:flex;align-items:flex-end;gap:10px;}
 .chart-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
-.bar-container{width:60%;height:328px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--surface2);border-radius:4px 4px 0 0;overflow:hidden;}
+.bar-container{width:60%;height:492px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--surface2);border-radius:4px 4px 0 0;overflow:hidden;}
 .stack-seg{width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:height .55s cubic-bezier(.4,0,.2,1);}
 .seg-cnt{font-family:var(--wide);font-weight:400;font-size:12px;color:rgba(0,0,0,0.75);line-height:1;}
 .sc1{background:var(--s1);}.sc2{background:var(--s2);}.sc3{background:var(--s3);}.sc4{background:var(--s4);}.sc5{background:var(--s5);}
@@ -303,7 +303,7 @@ const db=firebase.database();
 const LABELS=['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
 const CONFETTI=['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
 const MEDALS=['1位','2位','3位','4位'];
-const CHART_H=328;
+const CHART_H=492;
 const REVEAL_AT_SEC=3.1;
 
 // ドラムロール音をbase64でセット
@@ -639,24 +639,27 @@ function showRanking(all){
   // 2〜4位
   const rest = ranked.slice(1);
 
-  // 内訳横棒グラフ生成
+  // 内訳：1本の積み上げ横棒グラフ
   const SCORE_COLORS_RES=['#e05a5a','#e07a30','#e0c030','#80c040','#40c890'];
   function makeBreakdown(counts, isFirst){
-    const maxCnt=Math.max(...counts,1);
-    const barH=isFirst?'14px':'10px';
+    const total=counts.reduce((a,b)=>a+b,0);
+    if(total===0) return '';
+    const barH=isFirst?'20px':'14px';
     const fontSize=isFirst?'clamp(12px,1.5vw,16px)':'clamp(10px,1.2vw,13px)';
-    const minWidth=isFirst?'160px':'110px';
-    return [5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
+    // 1〜5点の順で積み上げ（左から1点・2点・・・5点）
+    const segs=[1,2,3,4,5].filter(s=>counts[s-1]>0).map(s=>{
+      const pct=(counts[s-1]/total*100).toFixed(1);
       const cnt=counts[s-1];
-      const pct=Math.round(cnt/maxCnt*100);
-      return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-        <span style="font-family:var(--wide);font-size:${fontSize};color:var(--muted);min-width:28px;text-align:right;">${s}点</span>
-        <div style="flex:1;min-width:${minWidth};background:var(--surface2);border-radius:3px;overflow:hidden;height:${barH};">
-          <div style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};border-radius:3px;transition:width .6s ease;"></div>
-        </div>
-        <span style="font-family:var(--wide);font-size:${fontSize};color:var(--muted);min-width:24px;">${cnt}票</span>
+      return `<div title="${s}点: ${cnt}票" style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        ${parseFloat(pct)>=8?`<span style="font-family:var(--wide);font-size:11px;color:rgba(0,0,0,0.7);white-space:nowrap;">${cnt}</span>`:''}
       </div>`;
     }).join('');
+    return `<div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;height:${barH};background:var(--surface2);border-radius:4px;overflow:hidden;display:flex;">
+        ${segs}
+      </div>
+      <span style="font-family:var(--wide);font-size:${fontSize};color:var(--muted);white-space:nowrap;">${total}票</span>
+    </div>`;
   }
 
   const firstHTML = first ? `
