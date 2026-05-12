@@ -662,21 +662,41 @@ function showRanking(all){
     </div>`;
   }
 
-  const firstHTML = first ? `
-    <div class="result-item ${getMedalClass(first.displayRank)}" id="ri0" style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);">
-      <div class="r-rank" style="color:${getMedalColor(first.displayRank)};font-size:clamp(56px,9vw,96px);font-family:var(--wide);font-weight:500;">${getRankLabel(first.displayRank)}</div>
+  // 1位が複数いる場合を取得
+  const firstTied = ranked.filter(t=>t.displayRank===1);
+  const isMultiFirst = firstTied.length > 1;
+  // 1位複数時はフォントを小さめに
+  const f1Rank   = isMultiFirst ? 'clamp(36px,5vw,60px)'   : 'clamp(56px,9vw,96px)';
+  const f1Entry  = isMultiFirst ? 'clamp(16px,2vw,24px)'   : 'clamp(24px,3.3vw,36px)';
+  const f1Name   = isMultiFirst ? 'clamp(20px,3.5vw,40px)' : 'clamp(30px,6vw,60px)';
+  const f1Pres   = isMultiFirst ? 'clamp(14px,2vw,24px)'   : 'clamp(27px,3.75vw,42px)';
+  const f1Score  = isMultiFirst ? 'clamp(52px,8vw,90px)'   : 'clamp(80px,14vw,140px)';
+  const f1ScoreU = isMultiFirst ? 'clamp(30px,4.5vw,54px)' : 'clamp(48px,7vw,84px)';
+  const f1Pad    = isMultiFirst ? 'clamp(14px,2vh,24px) clamp(12px,2vw,24px)' : 'clamp(22px,4vh,40px) clamp(24px,5vw,48px)';
+  const f1Break  = isMultiFirst ? 'clamp(11px,1.3vw,16px)' : 'clamp(14px,1.8vw,22px)';
+
+  function makeFirstCard(t, idSuffix){
+    return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${idSuffix}" style="flex:1;padding:${f1Pad};">
+      <div class="r-rank" style="color:${getMedalColor(t.displayRank)};font-size:${f1Rank};font-family:var(--wide);font-weight:500;">${getRankLabel(t.displayRank)}</div>
       <div class="r-info">
-        <span class="r-entry" style="font-size:clamp(24px,3.3vw,36px);">ENTRY #${first.idx+1}</span>
-        <div class="r-name" style="font-size:clamp(30px,6vw,60px);font-weight:500;">${first.name}</div>
-        <div class="r-pres" style="font-size:clamp(27px,3.75vw,42px);">${first.presenter}</div>
-        <div style="font-size:clamp(14px,1.8vw,22px);color:var(--muted);margin-top:6px;">${makeBreakdown(first.counts, true)}</div>
+        <span class="r-entry" style="font-size:${f1Entry};">ENTRY #${t.idx+1}</span>
+        <div class="r-name" style="font-size:${f1Name};font-weight:500;">${t.name}</div>
+        <div class="r-pres" style="font-size:${f1Pres};">${t.presenter}</div>
+        <div style="font-size:${f1Break};color:var(--muted);margin-top:6px;">${makeBreakdown(t.counts, !isMultiFirst)}</div>
       </div>
       <div class="r-score-wrap">
-        <div class="r-score" style="font-size:clamp(80px,14vw,140px);color:var(--accent);">
-          ${first.total}<span style="font-size:clamp(48px,7vw,84px);color:var(--accent);font-family:var(--wide);font-weight:500;">点</span>
+        <div class="r-score" style="font-size:${f1Score};color:var(--accent);">
+          ${t.total}<span style="font-size:${f1ScoreU};color:var(--accent);font-family:var(--wide);font-weight:500;">点</span>
         </div>
       </div>
-    </div>` : '';
+    </div>`;
+  }
+
+  const firstHTML = isMultiFirst
+    ? `<div style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;margin-bottom:clamp(20px,4vh,48px);" id="ri0wrap">
+        ${firstTied.map((t,j)=>makeFirstCard(t,'0_'+j)).join('')}
+      </div>`
+    : (first ? makeFirstCard(first,'0')+'<div style="height:0;" id="ri0wrap"></div>' : '');
 
   const restHTML = rest.length ? `
     <div id="restRow" style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;">
@@ -700,11 +720,17 @@ function showRanking(all){
   document.getElementById('resultList').innerHTML=firstHTML+restHTML;
   // 1位のアニメーション
   setTimeout(()=>{
-    const el=document.getElementById('ri0');
-    if(el){
-      el.classList.add('show');
-      // 1位が同順位でない場合のみ拡大
-      if(first.displayRank===1) el.style.marginBottom='clamp(20px,4vh,48px)';
+    if(isMultiFirst){
+      firstTied.forEach((_,j)=>{
+        const el=document.getElementById('ri0_'+j);
+        if(el) el.classList.add('show');
+      });
+    } else {
+      const el=document.getElementById('ri0');
+      if(el){
+        el.classList.add('show');
+        el.style.marginBottom='clamp(20px,4vh,48px)';
+      }
     }
   },400);
   // 2〜4位をまとめて表示
