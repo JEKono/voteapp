@@ -105,7 +105,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 #resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
 #resultOverlay.active{display:flex;}
 .drumroll-wrap{text-align:center;}
-.drumroll-wrap h2{font-family:var(--wide);font-weight:500;font-size:clamp(44px,9vw,88px);letter-spacing:5px;color:var(--accent);animation:pulse .3s infinite alternate;}
+.drumroll-wrap h2{font-family:var(--wide);font-weight:500;font-size:clamp(88px,18vw,176px);letter-spacing:5px;color:var(--accent);animation:pulse .3s infinite alternate;}
 .drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}
 #resultWrap{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;max-height:100vh;}
@@ -685,9 +685,9 @@ function showRanking(all){
         return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
           <div style="font-family:var(--wide);font-weight:500;font-size:clamp(28px,4vw,52px);color:${getMedalColor(t.displayRank)};text-align:center;width:100%;display:block;margin-bottom:8px;">${getRankLabel(t.displayRank)}</div>
           <div class="r-info" style="flex:unset;text-align:center;">
-            <span class="r-entry" style="font-size:clamp(16px,1.95vw,24px);">ENTRY #${t.idx+1}</span>
-            <div class="r-name" style="font-size:clamp(21px,3vw,33px);">${t.name}</div>
-            <div class="r-pres" style="font-size:clamp(16px,1.95vw,24px);">${t.presenter}</div>
+            <span class="r-entry" style="font-size:clamp(19px,2.34vw,29px);">ENTRY #${t.idx+1}</span>
+            <div class="r-name" style="font-size:clamp(25px,3.6vw,40px);">${t.name}</div>
+            <div class="r-pres" style="font-size:clamp(19px,2.34vw,29px);">${t.presenter}</div>
             <div style="font-size:clamp(11px,1.3vw,17px);color:var(--muted);margin-top:4px;">${makeBreakdown(t.counts)}</div>
           </div>
           <div class="r-score" style="font-size:clamp(32px,5vw,60px);color:var(--accent);">
