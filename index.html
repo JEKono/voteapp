@@ -110,7 +110,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}
 #resultWrap{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;max-height:100vh;}
 .result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(32px,6vh,64px);text-align:center;}
-.result-list{display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);width:100%;max-width:1230px;}
+.result-list{display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);width:100%;max-width:1400px;box-sizing:border-box;}
 .result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);}
 .result-item.show{opacity:1;transform:none;}.result-item.gold.show{transform:scale(1.10);}
 .result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.07);transform:scale(1.10);transform-origin:center;box-shadow:0 0 32px rgba(240,192,64,0.25);}
@@ -636,8 +636,8 @@ function showRanking(all){
   if(voterEl) voterEl.textContent=`投票者数 ${totalVoters} 名`;
   // 1位
   const first = ranked[0];
-  // 2〜4位
-  const rest = ranked.slice(1);
+  // 1位以外（displayRankが1でない人）
+  const rest = ranked.filter(t=>t.displayRank!==1);
 
   // 内訳：1本の積み上げ横棒グラフ
   const SCORE_COLORS_RES=['#e05a5a','#e07a30','#e0c030','#80c040','#40c890'];
@@ -676,7 +676,7 @@ function showRanking(all){
   const f1Break  = isMultiFirst ? 'clamp(11px,1.3vw,16px)' : 'clamp(14px,1.8vw,22px)';
 
   function makeFirstCard(t, idSuffix){
-    return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${idSuffix}" style="flex:1;padding:${f1Pad};">
+    return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${idSuffix}" style="flex:1;min-width:0;box-sizing:border-box;padding:${f1Pad};">
       <div class="r-rank" style="color:${getMedalColor(t.displayRank)};font-size:${f1Rank};font-family:var(--wide);font-weight:500;">${getRankLabel(t.displayRank)}</div>
       <div class="r-info">
         <span class="r-entry" style="font-size:${f1Entry};">ENTRY #${t.idx+1}</span>
@@ -693,7 +693,7 @@ function showRanking(all){
   }
 
   const firstHTML = isMultiFirst
-    ? `<div style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;margin-bottom:clamp(20px,4vh,48px);" id="ri0wrap">
+    ? `<div style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;margin-bottom:clamp(20px,4vh,48px);box-sizing:border-box;overflow:hidden;" id="ri0wrap">
         ${firstTied.map((t,j)=>makeFirstCard(t,'0_'+j)).join('')}
       </div>`
     : (first ? makeFirstCard(first,'0')+'<div style="height:0;" id="ri0wrap"></div>' : '');
