@@ -240,10 +240,17 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 </div>
 
 <div id="resultOverlay">
-  <div class="drumroll-wrap" id="drumrollWrap">
+  <!-- 待機画面 -->
+  <div id="resultStandbyWrap" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;gap:60px;">
+    <div style="font-family:var(--wide);font-weight:500;font-size:clamp(60px,14vw,160px);letter-spacing:8px;color:var(--accent);text-align:center;line-height:1.2;animation:glow 2s ease-in-out infinite alternate;">結果発表</div>
+    <button class="btn primary" style="font-size:clamp(20px,3vw,32px);padding:20px 64px;" onclick="startReveal()">🎉 結果発表スタート</button>
+  </div>
+  <!-- ドラムロール画面 -->
+  <div class="drumroll-wrap" id="drumrollWrap" style="display:none;">
     <h2>投票結果集計中</h2>
     <p>しばらくお待ちください...</p>
   </div>
+  <!-- 結果画面 -->
   <div id="resultWrap">
     <div class="result-title">🏆 結果発表 🏆</div>
     <div class="result-list" id="resultList"></div>
