@@ -255,7 +255,10 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
     <div class="result-title">🏆 結果発表 🏆</div>
     <div class="result-list" id="resultList"></div>
     <div id="voterCountDisplay" style="font-family:var(--wide);font-weight:500;font-size:clamp(27px,4.8vw,45px);color:var(--muted);margin-top:clamp(24px,4vh,48px);margin-bottom:12px;text-align:center;"></div>
-    <button class="close-btn" onclick="closeResult()">閉じる</button>
+    <div style="display:flex;gap:16px;align-items:center;justify-content:center;">
+      <button class="close-btn" id="resultBgmBtn" onclick="toggleResultBGM()">⏸ BGM 停止</button>
+      <button class="close-btn" onclick="closeResult()">閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -636,10 +639,24 @@ function showRanking(all){
   // 2〜4位
   const rest = ranked.slice(1);
 
-  // 内訳テキスト生成
-  function makeBreakdown(counts){
-    return [5,4,3,2,1].filter(s=>counts[s-1]>0)
-      .map(s=>`${s}点×${counts[s-1]}票`).join('　');
+  // 内訳横棒グラフ生成
+  const SCORE_COLORS_RES=['#e05a5a','#e07a30','#e0c030','#80c040','#40c890'];
+  function makeBreakdown(counts, isFirst){
+    const maxCnt=Math.max(...counts,1);
+    const barH=isFirst?'14px':'10px';
+    const fontSize=isFirst?'clamp(12px,1.5vw,16px)':'clamp(10px,1.2vw,13px)';
+    const minWidth=isFirst?'160px':'110px';
+    return [5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
+      const cnt=counts[s-1];
+      const pct=Math.round(cnt/maxCnt*100);
+      return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+        <span style="font-family:var(--wide);font-size:${fontSize};color:var(--muted);min-width:28px;text-align:right;">${s}点</span>
+        <div style="flex:1;min-width:${minWidth};background:var(--surface2);border-radius:3px;overflow:hidden;height:${barH};">
+          <div style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};border-radius:3px;transition:width .6s ease;"></div>
+        </div>
+        <span style="font-family:var(--wide);font-size:${fontSize};color:var(--muted);min-width:24px;">${cnt}票</span>
+      </div>`;
+    }).join('');
   }
 
   const firstHTML = first ? `
@@ -649,7 +666,7 @@ function showRanking(all){
         <span class="r-entry" style="font-size:clamp(24px,3.3vw,36px);">ENTRY #${first.idx+1}</span>
         <div class="r-name" style="font-size:clamp(30px,6vw,60px);font-weight:500;">${first.name}</div>
         <div class="r-pres" style="font-size:clamp(27px,3.75vw,42px);">${first.presenter}</div>
-        <div style="font-size:clamp(14px,1.8vw,22px);color:var(--muted);margin-top:6px;">${makeBreakdown(first.counts)}</div>
+        <div style="font-size:clamp(14px,1.8vw,22px);color:var(--muted);margin-top:6px;">${makeBreakdown(first.counts, true)}</div>
       </div>
       <div class="r-score-wrap">
         <div class="r-score" style="font-size:clamp(80px,14vw,140px);color:var(--accent);">
@@ -700,6 +717,19 @@ function showRanking(all){
       if(el) el.classList.add('show');
     });
   },1000);
+}
+
+function toggleResultBGM(){
+  const bgm=document.getElementById('_bgmEl');
+  const btn=document.getElementById('resultBgmBtn');
+  if(!bgm||!btn) return;
+  if(bgm.paused){
+    bgm.play().catch(()=>{});
+    btn.textContent='⏸ BGM 停止';
+  }else{
+    bgm.pause();
+    btn.textContent='▶ BGM 再生';
+  }
 }
 
 function closeResult(){
