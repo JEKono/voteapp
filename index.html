@@ -127,6 +127,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .close-btn{margin-top:clamp(12px,2vh,20px);padding:12px 40px;border-radius:50px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:400;cursor:pointer;}
 .cp{position:fixed;top:-20px;animation:fall linear forwards;z-index:200;border-radius:2px;}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+@keyframes glow{from{text-shadow:0 0 20px rgba(240,192,64,0.3);opacity:.85;}to{text-shadow:0 0 60px rgba(240,192,64,0.8),0 0 100px rgba(240,192,64,0.4);opacity:1;}}
 
 /* カードダイアログ */
 #cardDialog{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
@@ -203,6 +204,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
         <div class="btn-row">
           <button class="btn end-vote" onclick="endVoting()">🛑 投票を締め切る</button>
           <button class="btn primary" onclick="revealResults()">🎉 結果発表！</button>
+          <button class="btn" id="bgmToggleBtn" onclick="toggleLiveBGM()">⏸ BGM 停止</button>
           <button class="btn danger" onclick="resetAll()">リセット</button>
         </div>
       </div>
@@ -364,6 +366,19 @@ function goAdmin(){
   listenVotes();
 }
 
+function toggleLiveBGM(){
+  const bgm = document.getElementById('_liveBgmEl');
+  const btn = document.getElementById('bgmToggleBtn');
+  if(!bgm || !btn) return;
+  if(bgm.paused){
+    bgm.play().catch(()=>{});
+    btn.textContent = '⏸ BGM 停止';
+  } else {
+    bgm.pause();
+    btn.textContent = '▶ BGM 再生';
+  }
+}
+
 function playLiveBGM(){
   try{
     const bgm=document.getElementById('_liveBgmEl');
@@ -518,18 +533,34 @@ async function submitVote(){
   show('thanksPage');
 }
 
+let _revealVotesCache = null;
+
 async function revealResults(){
+  // 投票データを取得してキャッシュ
   const snap=await db.ref('votes').once('value');
-  const all=Object.values(snap.val()||{});
-  // 集計中画面を表示
-  document.getElementById('drumrollWrap').style.display='block';
+  _revealVotesCache=Object.values(snap.val()||{});
+
+  // 待機画面を表示
+  document.getElementById('resultStandbyWrap').style.display='flex';
+  document.getElementById('drumrollWrap').style.display='none';
   document.getElementById('resultWrap').style.display='none';
   document.getElementById('resultOverlay').classList.add('active');
+
+  // ライブBGMを停止
+  const liveBgm=document.getElementById('_liveBgmEl');
+  if(liveBgm){liveBgm.pause();liveBgm.currentTime=0;}
+}
+
+function startReveal(){
+  const all=_revealVotesCache||[];
+  // 待機画面を非表示にしてドラムロール開始
+  document.getElementById('resultStandbyWrap').style.display='none';
+  document.getElementById('drumrollWrap').style.display='block';
+  document.getElementById('resultWrap').style.display='none';
 
   const drumEl=document.getElementById('_drumEl');
   bgmStarted=false;
 
-  // ドラムロール終了後にBGM開始
   drumEl.onended=function(){
     if(!bgmStarted){
       bgmStarted=true;
@@ -538,16 +569,11 @@ async function revealResults(){
       bgm.play().catch(()=>{});
     }
   };
-  // ライブBGMを停止
-  const liveBgm=document.getElementById('_liveBgmEl');
-  if(liveBgm){liveBgm.pause();liveBgm.currentTime=0;}
 
-  // REVEAL_AT_SEC秒後に結果表示（音には触れない）
   drumEl.currentTime=0;
   drumEl.play().catch(()=>{});
 
   setTimeout(async()=>{
-    // Firebaseから最新のteams（並び替え済み）を取得
     const sessSnap=await db.ref('session/teams').once('value');
     if(sessSnap.val()) teams=sessSnap.val();
     document.getElementById('drumrollWrap').style.display='none';
