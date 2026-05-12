@@ -596,10 +596,38 @@ function startReveal(){
 function showRanking(all){
   const ranked=teams.map((t,i)=>{
     const sc=all.map(v=>v.scores[i]).filter(s=>s>0);
-    return{...t,total:sc.reduce((a,b)=>a+b,0),count:sc.length,idx:i};
-  }).sort((a,b)=>b.total-a.total);
-  const medalClass=['gold','silver','bronze',''];
-  const medalColor=['var(--accent)','#c0c0d0','#cd7f32','var(--muted)'];
+    const total=sc.reduce((a,b)=>a+b,0);
+    // 各点数の投票数をカウント
+    const counts=[0,0,0,0,0];
+    sc.forEach(s=>{if(s>=1&&s<=5)counts[s-1]++;});
+    return{...t,total,count:sc.length,idx:i,counts};
+  }).sort((a,b)=>{
+    // ① 合計点で比較
+    if(b.total!==a.total) return b.total-a.total;
+    // ② 5点→1点の順で投票数を比較
+    for(let sc=5;sc>=1;sc--){
+      if(b.counts[sc-1]!==a.counts[sc-1]) return b.counts[sc-1]-a.counts[sc-1];
+    }
+    // ③ 全て同じなら同順位（0を返す）
+    return 0;
+  });
+
+  // 同順位の処理：同じ順位には同じ表示をする
+  let displayRank=1;
+  ranked.forEach((t,i)=>{
+    if(i===0){
+      t.displayRank=1;
+    } else {
+      const prev=ranked[i-1];
+      const sameTotalAndCounts=t.total===prev.total &&
+        [0,1,2,3,4].every(j=>t.counts[j]===prev.counts[j]);
+      t.displayRank=sameTotalAndCounts?prev.displayRank:i+1;
+    }
+  });
+  // displayRankに基づいてmedal設定
+  const getMedalClass=(rank)=>rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
+  const getMedalColor=(rank)=>rank===1?'var(--accent)':rank===2?'#c0c0d0':rank===3?'#cd7f32':'var(--muted)';
+  const getRankLabel=(rank)=>rank===1?'1位':rank===2?'2位':rank===3?'3位':'4位';
   const totalVoters=ranked[0]?ranked[0].count:0;
   const voterEl=document.getElementById('voterCountDisplay');
   if(voterEl) voterEl.textContent=`投票者数 ${totalVoters} 名`;
@@ -609,8 +637,8 @@ function showRanking(all){
   const rest = ranked.slice(1);
 
   const firstHTML = first ? `
-    <div class="result-item gold" id="ri0" style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);">
-      <div class="r-rank" style="color:${medalColor[0]};font-size:clamp(56px,9vw,96px);font-family:var(--wide);font-weight:500;">${MEDALS[0]}</div>
+    <div class="result-item ${getMedalClass(first.displayRank)}" id="ri0" style="padding:clamp(22px,4vh,40px) clamp(24px,5vw,48px);">
+      <div class="r-rank" style="color:${getMedalColor(first.displayRank)};font-size:clamp(56px,9vw,96px);font-family:var(--wide);font-weight:500;">${getRankLabel(first.displayRank)}</div>
       <div class="r-info">
         <span class="r-entry" style="font-size:clamp(16px,2.2vw,24px);">ENTRY #${first.idx+1}</span>
         <div class="r-name" style="font-size:clamp(30px,6vw,60px);font-weight:500;">${first.name}</div>
@@ -627,8 +655,8 @@ function showRanking(all){
     <div id="restRow" style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;">
       ${rest.map((t,j)=>{
         const i=j+1;
-        return `<div class="result-item ${medalClass[i]}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
-          <div style="font-family:var(--wide);font-weight:500;font-size:clamp(28px,4vw,52px);color:${medalColor[i]};text-align:center;width:100%;display:block;margin-bottom:8px;">${MEDALS[i]}</div>
+        return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
+          <div style="font-family:var(--wide);font-weight:500;font-size:clamp(28px,4vw,52px);color:${getMedalColor(t.displayRank)};text-align:center;width:100%;display:block;margin-bottom:8px;">${getRankLabel(t.displayRank)}</div>
           <div class="r-info" style="flex:unset;text-align:center;">
             <span class="r-entry" style="font-size:clamp(11px,1.3vw,16px);">ENTRY #${t.idx+1}</span>
             <div class="r-name" style="font-size:clamp(14px,2vw,22px);">${t.name}</div>
@@ -645,7 +673,11 @@ function showRanking(all){
   // 1位のアニメーション
   setTimeout(()=>{
     const el=document.getElementById('ri0');
-    if(el){el.classList.add('show');el.style.marginBottom='clamp(20px,4vh,48px)';}
+    if(el){
+      el.classList.add('show');
+      // 1位が同順位でない場合のみ拡大
+      if(first.displayRank===1) el.style.marginBottom='clamp(20px,4vh,48px)';
+    }
   },400);
   // 2〜4位をまとめて表示
   setTimeout(()=>{
