@@ -700,7 +700,7 @@ function showRanking(all){
 
   const restHTML = rest.length ? `
     <div id="restRow" style="display:flex;gap:clamp(8px,1.5vw,16px);width:100%;">
-      ${rest.map((t,j)=>{
+      ${rest.filter(t=>t.displayRank!==1).map((t,j)=>{
         const i=j+1;
         return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${i}" style="flex:1;flex-direction:column;align-items:center;text-align:center;padding:clamp(10px,1.8vh,20px) clamp(8px,1.5vw,16px);">
           <div style="font-family:var(--wide);font-weight:500;font-size:clamp(28px,4vw,52px);color:${getMedalColor(t.displayRank)};text-align:center;width:100%;display:block;margin-bottom:8px;">${getRankLabel(t.displayRank)}</div>
@@ -733,7 +733,7 @@ function showRanking(all){
       }
     }
   },400);
-  // 2〜4位をまとめて表示
+  // 2位以下をまとめて表示
   setTimeout(()=>{
     const restRow=document.getElementById('restRow');
     if(restRow){
@@ -741,8 +741,8 @@ function showRanking(all){
       restRow.style.transition='all .65s cubic-bezier(.4,0,.2,1)';
       setTimeout(()=>{restRow.style.opacity='1';restRow.style.transform='none';},50);
     }
-    [1,2,3].forEach(i=>{
-      const el=document.getElementById('ri'+i);
+    rest.filter(t=>t.displayRank!==1).forEach((_,j)=>{
+      const el=document.getElementById('ri'+(j+1));
       if(el) el.classList.add('show');
     });
   },1000);
