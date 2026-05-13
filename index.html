@@ -102,16 +102,16 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .center-wrap .icon{font-size:80px;margin-bottom:20px;}
 .center-wrap h2{font-family:var(--wide);font-weight:500;font-size:48px;letter-spacing:3px;margin-bottom:12px;}
 .center-wrap p{font-size:18px;color:var(--muted);line-height:2;}
-#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:40px 60px;overflow-y:auto;}
+#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px 40px;overflow-y:auto;overflow-x:hidden;}
 #resultOverlay.active{display:flex;}
 .drumroll-wrap{text-align:center;}
 .drumroll-wrap h2{font-family:var(--wide);font-weight:500;font-size:clamp(88px,18vw,176px);letter-spacing:5px;color:var(--accent);animation:pulse .3s infinite alternate;}
 .drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}to{opacity:1;}}
-#resultWrap{display:none;flex-direction:column;align-items:center;width:100%;max-width:min(1400px,calc(100vw - 120px));}
+#resultWrap{display:none;flex-direction:column;align-items:center;justify-content:flex-start;width:100%;max-width:1300px;margin:0 auto;}
 .result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(24px,4vh,48px);text-align:center;width:100%;flex-shrink:0;}
-.result-list{display:flex;flex-direction:column;gap:clamp(16px,2.5vh,28px);width:100%;max-width:min(1400px,calc(100vw - 80px));box-sizing:border-box;}
-.result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);}
+.result-list{display:flex;flex-direction:column;gap:20px;width:100%;box-sizing:border-box;}
+.result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;flex-direction:row;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);width:100%;box-sizing:border-box;}
 .result-item.show{opacity:1;transform:none;}
 .result-item.gold{border:2px solid var(--accent);background:rgba(240,192,64,0.07);border-radius:14px;}
 .result-item.silver{border-color:rgba(192,192,210,0.5);}
@@ -676,7 +676,7 @@ function showRanking(all){
   const f1Break  = isMultiFirst ? 'clamp(12px,1.5vw,18px)'  : 'clamp(14px,1.8vw,22px)';
 
   function makeFirstCard(t, idSuffix){
-    return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${idSuffix}" style="width:100%;box-sizing:border-box;padding:${f1Pad};display:flex;flex-direction:row;align-items:center;gap:clamp(16px,3vw,40px);border-radius:14px;">
+    return `<div class="result-item ${getMedalClass(t.displayRank)}" id="ri${idSuffix}" style="width:100%;box-sizing:border-box;padding:${f1Pad};">
       <div class="r-rank" style="color:${getMedalColor(t.displayRank)};font-size:${f1Rank};font-family:var(--wide);font-weight:500;min-width:${isMultiFirst?'120px':'clamp(48px,6vw,76px)'};">${getRankLabel(t.displayRank)}</div>
       <div class="r-info" style="flex:1;min-width:0;">
         <span class="r-entry" style="font-size:${f1Entry};">ENTRY #${t.idx+1}</span>
