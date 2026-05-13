@@ -567,6 +567,11 @@ async function revealResults(){
 function startReveal(){
   const all=_revealVotesCache||[];
   // 待機画面を非表示にしてドラムロール開始
+  const ro=document.getElementById('resultOverlay');
+  ro.style.display='flex';
+  ro.style.flexDirection='column';
+  ro.style.alignItems='center';
+  ro.style.justifyContent='center';
   document.getElementById('resultStandbyWrap').style.display='none';
   document.getElementById('drumrollWrap').style.display='block';
   document.getElementById('resultWrap').style.display='none';
@@ -590,7 +595,11 @@ function startReveal(){
     const sessSnap=await db.ref('session/teams').once('value');
     if(sessSnap.val()) teams=sessSnap.val();
     document.getElementById('drumrollWrap').style.display='none';
-    document.getElementById('resultWrap').style.display='flex';
+    const rw=document.getElementById('resultWrap');
+    rw.style.display='flex';
+    rw.style.width='90%';
+    rw.style.maxWidth='1200px';
+    rw.style.margin='0 auto';
     showRanking(all);
     launchConfetti();
   }, REVEAL_AT_SEC*1000);
