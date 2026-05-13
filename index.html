@@ -102,13 +102,13 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .center-wrap .icon{font-size:80px;margin-bottom:20px;}
 .center-wrap h2{font-family:var(--wide);font-weight:500;font-size:48px;letter-spacing:3px;margin-bottom:12px;}
 .center-wrap p{font-size:18px;color:var(--muted);line-height:2;}
-#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:30px;}
-#resultOverlay.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#resultOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:100;}
+#resultOverlay.active{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;}
 .drumroll-wrap{text-align:center;}
 .drumroll-wrap h2{font-family:var(--wide);font-weight:500;font-size:clamp(88px,18vw,176px);letter-spacing:5px;color:var(--accent);animation:pulse .3s infinite alternate;}
 .drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}to{opacity:1;}}
-#resultWrap{display:none;flex-direction:column;align-items:center;width:90%;max-width:1200px;margin:0 auto;}
+#resultWrap{flex-direction:column;align-items:center;width:90vw;max-width:1200px;}
 .result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(24px,4vh,48px);text-align:center;width:100%;flex-shrink:0;}
 .result-list{display:flex;flex-direction:column;gap:16px;width:100%;box-sizing:border-box;}
 .result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;flex-direction:row;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transition:opacity .65s ease;width:100%;box-sizing:border-box;}
@@ -251,9 +251,9 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
     <p>しばらくお待ちください...</p>
   </div>
   <!-- 結果画面 -->
-  <div id="resultWrap">
+  <div id="resultWrap" style="display:none;flex-direction:column;align-items:center;width:90vw;max-width:1200px;margin-left:auto;margin-right:auto;">
     <div class="result-title">🏆 結果発表 🏆</div>
-    <div class="result-list" id="resultList"></div>
+    <div class="result-list" id="resultList" style="width:100%;box-sizing:border-box;"></div>
     <div id="voterCountDisplay" style="font-family:var(--wide);font-weight:500;font-size:clamp(27px,4.8vw,45px);color:var(--muted);margin-top:clamp(24px,4vh,48px);margin-bottom:12px;text-align:center;"></div>
     <div style="display:flex;gap:16px;align-items:center;justify-content:center;">
       <button class="close-btn" id="resultBgmBtn" onclick="toggleResultBGM()">⏸ BGM 停止</button>
