@@ -102,14 +102,14 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .center-wrap .icon{font-size:80px;margin-bottom:20px;}
 .center-wrap h2{font-family:var(--wide);font-weight:500;font-size:48px;letter-spacing:3px;margin-bottom:12px;}
 .center-wrap p{font-size:18px;color:var(--muted);line-height:2;}
-#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;}
+#resultOverlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:40px 60px;overflow-y:auto;}
 #resultOverlay.active{display:flex;}
 .drumroll-wrap{text-align:center;}
 .drumroll-wrap h2{font-family:var(--wide);font-weight:500;font-size:clamp(88px,18vw,176px);letter-spacing:5px;color:var(--accent);animation:pulse .3s infinite alternate;}
 .drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}to{opacity:1;}}
-#resultWrap{display:none;flex-direction:column;align-items:center;width:100%;padding-bottom:20px;}
-.result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(24px,4vh,48px);text-align:center;width:100%;}
+#resultWrap{display:none;flex-direction:column;align-items:center;width:100%;max-width:min(1400px,calc(100vw - 120px));}
+.result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(24px,4vh,48px);text-align:center;width:100%;flex-shrink:0;}
 .result-list{display:flex;flex-direction:column;gap:clamp(16px,2.5vh,28px);width:100%;max-width:min(1400px,calc(100vw - 80px));box-sizing:border-box;}
 .result-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,3vw,28px);display:flex;align-items:center;gap:clamp(12px,2vw,24px);opacity:0;transform:translateX(-60px);transition:all .65s cubic-bezier(.4,0,.2,1);}
 .result-item.show{opacity:1;transform:none;}
@@ -241,12 +241,12 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 
 <div id="resultOverlay">
   <!-- 待機画面 -->
-  <div id="resultStandbyWrap" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;gap:60px;">
+  <div id="resultStandbyWrap" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:60vh;gap:60px;">
     <div style="font-family:var(--wide);font-weight:500;font-size:clamp(60px,14vw,160px);letter-spacing:8px;color:var(--accent);text-align:center;line-height:1.2;animation:glow 2s ease-in-out infinite alternate;">結果発表</div>
     <button class="btn primary" style="font-size:clamp(20px,3vw,32px);padding:20px 64px;" onclick="startReveal()">🎉 スタート</button>
   </div>
   <!-- ドラムロール画面 -->
-  <div class="drumroll-wrap" id="drumrollWrap" style="display:none;">
+  <div class="drumroll-wrap" id="drumrollWrap" style="display:none;text-align:center;width:100%;">
     <h2>投票結果集計中</h2>
     <p>しばらくお待ちください...</p>
   </div>
