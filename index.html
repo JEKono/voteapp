@@ -648,7 +648,7 @@ function showRanking(all){
     const barH=isFirst?'20px':'14px';
     const fontSize=isFirst?'clamp(12px,1.5vw,16px)':'clamp(10px,1.2vw,13px)';
     const labelSize=isFirst?'clamp(13px,1.6vw,18px)':'';
-    const segs=[1,2,3,4,5].filter(s=>counts[s-1]>0).map(s=>{
+    const segs=[5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
       const pct=(counts[s-1]/total*100).toFixed(1);
       const cnt=counts[s-1];
       return `<div title="${s}点: ${cnt}票" style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};display:flex;align-items:center;justify-content:center;overflow:hidden;">
@@ -657,7 +657,7 @@ function showRanking(all){
     }).join('');
 
     // 1位のみ：各点数の意味を左に表示
-    const labelRows = isFirst ? [1,2,3,4,5].filter(s=>counts[s-1]>0).map(s=>{
+    const labelRows = isFirst ? [5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
       const cnt=counts[s-1];
       const pct=(counts[s-1]/total*100).toFixed(1);
       return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
