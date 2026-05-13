@@ -65,14 +65,14 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 .chart-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
 .bar-container{width:60%;height:492px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--surface2);border-radius:4px 4px 0 0;overflow:hidden;}
 .stack-seg{width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:height .55s cubic-bezier(.4,0,.2,1);}
-.seg-cnt{font-family:var(--wide);font-weight:400;font-size:12px;color:rgba(0,0,0,0.75);line-height:1;}
+.seg-cnt{font-family:var(--wide);font-weight:400;font-size:30px;color:rgba(0,0,0,0.75);line-height:1;}
 .sc1{background:var(--s1);}.sc2{background:var(--s2);}.sc3{background:var(--s3);}.sc4{background:var(--s4);}.sc5{background:var(--s5);}
 .chart-score-num{font-family:var(--wide);font-weight:500;font-size:72px;color:var(--text);line-height:1;display:flex;align-items:baseline;gap:4px;}
 .chart-score-unit{font-family:var(--wide);font-weight:500;font-size:43px;color:var(--muted);}
 .chart-baseline{height:1px;background:var(--border);margin:5px 0 8px;}
 .chart-entry-label{font-family:var(--wide);font-weight:400;font-size:14px;color:var(--muted);letter-spacing:1px;filter:blur(6px);user-select:none;}
 .chart-name-label{font-size:14px;color:var(--text);text-align:center;line-height:1.4;filter:blur(6px);user-select:none;}
-.chart-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;justify-content:center;}
+.chart-legend{display:flex;flex-wrap:wrap;gap:32px;margin-top:16px;justify-content:center;}
 .legend-item{display:flex;align-items:center;gap:8px;font-size:24px;color:var(--muted);}
 .legend-dot{width:22px;height:22px;border-radius:3px;flex-shrink:0;}
 #votePage{background:var(--bg);}
@@ -106,7 +106,7 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
 #resultOverlay.active{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;}
 .drumroll-wrap{text-align:center;}
 .drumroll-wrap h2{font-family:var(--wide);font-weight:500;font-size:clamp(88px,18vw,176px);letter-spacing:5px;color:var(--accent);animation:pulse .3s infinite alternate;}
-.drumroll-wrap p{font-size:clamp(16px,2.5vw,24px);color:var(--muted);margin-top:16px;}
+.drumroll-wrap p{font-size:clamp(32px,5vw,48px);color:var(--muted);margin-top:16px;}
 @keyframes pulse{from{opacity:.55;transform:scale(.95);}to{opacity:1;transform:scale(1.04);}}to{opacity:1;}}
 #resultWrap{flex-direction:column;align-items:center;width:90vw;max-width:1200px;}
 .result-title{font-family:var(--wide);font-weight:500;font-size:clamp(36px,8vw,78px);letter-spacing:5px;color:var(--accent);margin-bottom:clamp(24px,4vh,48px);text-align:center;width:100%;flex-shrink:0;}
@@ -194,11 +194,11 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
           <div class="chart-area" id="chartArea"></div>
           <div class="chart-baseline"></div>
           <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s1)"></div>1点 売れない</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s2)"></div>2点 改善による</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s3)"></div>3点 泣かず飛ばず</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s4)"></div>4点 そこそこ売れそう</div>
             <div class="legend-item"><div class="legend-dot" style="background:var(--s5)"></div>5点 バズりそう</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s4)"></div>4点 そこそこ売れそう</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s3)"></div>3点 泣かず飛ばず</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s2)"></div>2点 改善による</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s1)"></div>1点 売れない</div>
           </div>
         </div>
         <div class="btn-row">
@@ -472,7 +472,7 @@ function updateChart(data){
       const cnt=st.counts[sc-1];
       const segPx=Math.round(cnt*sc*pxPerPt);
       seg.style.height=segPx+'px';
-      seg.innerHTML=segPx>=16&&cnt>0?`<span class="seg-cnt">${cnt}</span>`:'';
+      seg.innerHTML=segPx>=40&&cnt>0?`<span class="seg-cnt">${cnt}票</span>`:'';
     }
     con.style.filter=st.total===maxTotal&&st.total>0?'brightness(1.15)':'none';
   });
@@ -639,46 +639,22 @@ function showRanking(all){
   // 1位以外（displayRankが1でない人）
   const rest = ranked.filter(t=>t.displayRank!==1);
 
-  // 内訳：1本の積み上げ横棒グラフ
+  // 内訳：テキストリスト形式
   const SCORE_COLORS_RES=['#e05a5a','#e07a30','#e0c030','#80c040','#40c890'];
   const SCORE_LABELS_RES=['売れない','改善による','泣かず飛ばず','そこそこ売れそう','バズりそう'];
   function makeBreakdown(counts, isFirst){
     const total=counts.reduce((a,b)=>a+b,0);
     if(total===0) return '';
-    const barH=isFirst?'20px':'14px';
-    const fontSize=isFirst?'clamp(12px,1.5vw,16px)':'clamp(10px,1.2vw,13px)';
-    const labelSize=isFirst?'clamp(13px,1.6vw,18px)':'';
-    const segs=[5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
-      const pct=(counts[s-1]/total*100).toFixed(1);
+    const fontSize=isFirst?'clamp(16px,2vw,24px)':'clamp(12px,1.4vw,18px)';
+    const gap=isFirst?'10px':'6px';
+    const rows=[5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
       const cnt=counts[s-1];
-      return `<div title="${s}点: ${cnt}票" style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};display:flex;align-items:center;justify-content:center;overflow:hidden;">
-        ${parseFloat(pct)>=8?`<span style="font-family:var(--wide);font-size:11px;color:rgba(0,0,0,0.7);white-space:nowrap;">${cnt}</span>`:''}
+      return `<div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:clamp(14px,1.6vw,20px);height:clamp(14px,1.6vw,20px);border-radius:3px;background:${SCORE_COLORS_RES[s-1]};flex-shrink:0;"></div>
+        <span style="font-family:var(--wide);font-size:${fontSize};color:var(--text);">${s}点 ${SCORE_LABELS_RES[s-1]} ${cnt}票</span>
       </div>`;
     }).join('');
-
-    // 1位のみ：各点数の意味を左に表示
-    const labelRows = isFirst ? [5,4,3,2,1].filter(s=>counts[s-1]>0).map(s=>{
-      const cnt=counts[s-1];
-      const pct=(counts[s-1]/total*100).toFixed(1);
-      return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-        <div style="width:12px;height:12px;border-radius:2px;background:${SCORE_COLORS_RES[s-1]};flex-shrink:0;"></div>
-        <span style="font-family:var(--wide);font-size:${labelSize};color:var(--muted);min-width:clamp(100px,14vw,180px);">${s}点 ${SCORE_LABELS_RES[s-1]}</span>
-        <div style="flex:1;height:16px;background:var(--surface2);border-radius:3px;overflow:hidden;">
-          <div style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};border-radius:3px;"></div>
-        </div>
-        <span style="font-family:var(--wide);font-size:${labelSize};color:var(--muted);min-width:32px;text-align:right;">${cnt}票</span>
-      </div>`;
-    }).join('') : '';
-
-    if(isFirst){
-      return `<div style="margin-top:8px;">${labelRows}</div>`;
-    }
-    return `<div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
-      <div style="flex:1;height:${barH};background:var(--surface2);border-radius:4px;overflow:hidden;display:flex;">
-        ${segs}
-      </div>
-      <span style="font-family:var(--wide);font-size:${fontSize};color:var(--muted);white-space:nowrap;">${total}票</span>
-    </div>`;
+    return `<div style="margin-top:10px;display:flex;flex-direction:column;gap:${gap};">${rows}</div>`;
   }
 
   // 1位が複数いる場合を取得
