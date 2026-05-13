@@ -194,11 +194,11 @@ body{font-family:'Noto Sans JP',sans-serif;font-weight:400;background:var(--bg);
           <div class="chart-area" id="chartArea"></div>
           <div class="chart-baseline"></div>
           <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s1)"></div>1点</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s2)"></div>2点</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s3)"></div>3点</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s4)"></div>4点</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--s5)"></div>5点</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s1)"></div>1点 売れない</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s2)"></div>2点 改善による</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s3)"></div>3点 泣かず飛ばず</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s4)"></div>4点 そこそこ売れそう</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--s5)"></div>5点 バズりそう</div>
           </div>
         </div>
         <div class="btn-row">
@@ -300,7 +300,7 @@ const firebaseConfig={
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
-const LABELS=['売れなさそう','改善が必要','泣かず飛ばず','そこそこ売れそう','バズりそう'];
+const LABELS=['売れない','改善による','泣かず飛ばず','そこそこ売れそう','バズりそう'];
 const CONFETTI=['#f0c040','#e05a5a','#7c6af7','#4fa8e0','#4ec97a','#fff'];
 const MEDALS=['1位','2位','3位','4位'];
 const CHART_H=492;
@@ -641,12 +641,13 @@ function showRanking(all){
 
   // 内訳：1本の積み上げ横棒グラフ
   const SCORE_COLORS_RES=['#e05a5a','#e07a30','#e0c030','#80c040','#40c890'];
+  const SCORE_LABELS_RES=['売れない','改善による','泣かず飛ばず','そこそこ売れそう','バズりそう'];
   function makeBreakdown(counts, isFirst){
     const total=counts.reduce((a,b)=>a+b,0);
     if(total===0) return '';
     const barH=isFirst?'20px':'14px';
     const fontSize=isFirst?'clamp(12px,1.5vw,16px)':'clamp(10px,1.2vw,13px)';
-    // 1〜5点の順で積み上げ（左から1点・2点・・・5点）
+    const labelSize=isFirst?'clamp(13px,1.6vw,18px)':'';
     const segs=[1,2,3,4,5].filter(s=>counts[s-1]>0).map(s=>{
       const pct=(counts[s-1]/total*100).toFixed(1);
       const cnt=counts[s-1];
@@ -654,6 +655,24 @@ function showRanking(all){
         ${parseFloat(pct)>=8?`<span style="font-family:var(--wide);font-size:11px;color:rgba(0,0,0,0.7);white-space:nowrap;">${cnt}</span>`:''}
       </div>`;
     }).join('');
+
+    // 1位のみ：各点数の意味を左に表示
+    const labelRows = isFirst ? [1,2,3,4,5].filter(s=>counts[s-1]>0).map(s=>{
+      const cnt=counts[s-1];
+      const pct=(counts[s-1]/total*100).toFixed(1);
+      return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+        <div style="width:12px;height:12px;border-radius:2px;background:${SCORE_COLORS_RES[s-1]};flex-shrink:0;"></div>
+        <span style="font-family:var(--wide);font-size:${labelSize};color:var(--muted);min-width:clamp(100px,14vw,180px);">${s}点 ${SCORE_LABELS_RES[s-1]}</span>
+        <div style="flex:1;height:16px;background:var(--surface2);border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${SCORE_COLORS_RES[s-1]};border-radius:3px;"></div>
+        </div>
+        <span style="font-family:var(--wide);font-size:${labelSize};color:var(--muted);min-width:32px;text-align:right;">${cnt}票</span>
+      </div>`;
+    }).join('') : '';
+
+    if(isFirst){
+      return `<div style="margin-top:8px;">${labelRows}</div>`;
+    }
     return `<div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
       <div style="flex:1;height:${barH};background:var(--surface2);border-radius:4px;overflow:hidden;display:flex;">
         ${segs}
